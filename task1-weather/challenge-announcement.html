@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据清洗过程可视化 - 溶解度数据</title>
+    <title>挑战任务一_天气瓶中的数据科学</title>
     <style>
+        :root {
+            --primary: #8A2BE2;
+            --secondary: #BA55D3;
+            --accent: #DDA0DD;
+            --light: #F5F0FF;
+            --dark: #4B0082;
+            --warning: #FF69B4;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -13,168 +22,87 @@
         }
         
         body {
-            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
-            min-height: 100vh;
-            padding: 20px;
+            background-color: #faf5ff;
             color: #333;
+            line-height: 1.6;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            overflow: hidden;
+            padding: 20px;
         }
         
         header {
-            background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            padding: 25px;
+            padding: 3rem 0;
             text-align: center;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         
         h1 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
         }
         
         .subtitle {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
         }
         
-        .main-content {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 20px;
-            gap: 20px;
-        }
-        
-        .file-explorer {
-            flex: 1;
-            min-width: 300px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-        
-        .file-viewer {
-            flex: 2;
-            min-width: 500px;
+        .section {
             background: white;
             border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
         }
         
-        .folder {
-            background: #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
+        .section:hover {
+            transform: translateY(-5px);
         }
         
-        .folder-title {
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #2c3e50;
+        h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent);
         }
         
-        .folder-icon {
-            margin-right: 10px;
-            font-size: 1.2rem;
+        h3 {
+            color: var(--dark);
+            margin: 1.5rem 0 1rem;
         }
         
-        .file-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        p {
+            margin-bottom: 1rem;
         }
         
-        .file-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 15px;
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        
-        .file-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        }
-        
-        .file-item.active {
-            border-color: #3498db;
-            background: #e8f4fd;
-        }
-        
-        .file-item.processed {
-            background: #eafaf1;
-            border-color: #2ecc71;
-        }
-        
-        .file-icon {
-            margin-right: 10px;
-            font-size: 1.2rem;
-        }
-        
-        .file-name {
-            flex: 1;
-        }
-        
-        .file-status {
-            font-size: 0.8rem;
-            padding: 3px 8px;
-            border-radius: 10px;
-            background: #f1f1f1;
-        }
-        
-        .status-pending {
-            background: #ffebee;
-            color: #e74c3c;
-        }
-        
-        .status-processing {
-            background: #fff3e0;
-            color: #f39c12;
-        }
-        
-        .status-completed {
-            background: #e8f5e9;
-            color: #2ecc71;
-        }
-        
-        .file-content {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            max-height: 200px;
-            overflow-y: auto;
+        .highlight {
+            background-color: #f9f0ff;
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 5px 5px 0;
         }
         
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
         }
         
         .data-table th {
-            background: #3498db;
+            background-color: var(--primary);
             color: white;
             padding: 12px 15px;
             text-align: left;
@@ -186,670 +114,588 @@
         }
         
         .data-table tr:nth-child(even) {
-            background: #f9f9f9;
+            background-color: #f8f9fa;
         }
         
         .data-table tr:hover {
-            background: #f1f8ff;
+            background-color: #f0e6ff;
         }
         
-        .missing-cell {
-            background-color: #ffcccc !important;
-            animation: pulse 1.5s infinite;
+        .missing-value {
+            background-color: #ffd6f7;
             font-weight: bold;
         }
         
-        .current-cell {
-            background-color: #ffffcc !important;
-            border: 2px solid #f1c40f;
+        .task-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 1.5rem;
         }
         
-        .filled-cell {
-            background-color: #ccffcc !important;
-        }
-        
-        .process-info {
-            background: #e8f4fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 4px solid #3498db;
-        }
-        
-        .process-step {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
+        .task-card {
+            flex: 1;
+            min-width: 300px;
             background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--secondary);
+        }
+        
+        .task-number {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .task-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .formula {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .folder-structure {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .folder {
+            margin-left: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .file {
+            margin-left: 2rem;
+            color: var(--secondary);
+        }
+        
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-table th {
+            background-color: var(--dark);
+            color: white;
+            padding: 12px 15px;
+            text-align: center;
+        }
+        
+        .result-table td {
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        
+        .result-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .visualization {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .crystal-img {
+            width: 200px;
+            height: 200px;
+            margin: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .factor-box {
+            display: inline-block;
+            background: var(--light);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem;
+            width: 200px;
+            text-align: center;
+            border: 2px solid var(--accent);
+        }
+        
+        .factor-box h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .arrow {
+            font-size: 2rem;
+            color: var(--secondary);
+            margin: 0 1rem;
+            vertical-align: middle;
+        }
+        
+        .material-box {
+            background: #f0e6ff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .step-box {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         
-        .controls {
+        .step-number {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--dark);
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
             text-align: center;
-            margin: 20px 0;
+            line-height: 25px;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
         }
         
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 1rem;
-            cursor: pointer;
-            margin: 0 10px;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        .help-system {
+            background: #fff0f5;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 2px dashed var(--warning);
         }
         
-        button:hover {
-            background: #2980b9;
-            transform: translateY(-3px);
+        .quick-nav {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
         }
         
-        button:active {
-            transform: translateY(1px);
-        }
-        
-        button:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-        }
-        
-        .speed-control {
-            margin-top: 15px;
-        }
-        
-        .result-panel {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 20px 0;
-        }
-        
-        .result-item {
+        .nav-links {
             display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 1rem;
         }
         
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
+        .nav-link {
+            display: inline-block;
+            background: var(--light);
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid var(--accent);
         }
         
-        @keyframes fileOpen {
-            0% { transform: scale(0.9); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        .nav-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
         }
         
-        .file-open {
-            animation: fileOpen 0.5s ease-out;
+        .compact-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 1.5rem 0;
+        }
+        
+        .compact-box {
+            flex: 1;
+            min-width: 250px;
+            background: white;
+            border-radius: 8px;
+            padding: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-top: 3px solid var(--secondary);
         }
         
         footer {
             text-align: center;
-            padding: 20px;
-            background: #f0f0f0;
-            color: #666;
-            font-size: 0.9rem;
+            margin-top: 3rem;
+            padding: 1.5rem;
+            color: #7f8c8d;
+            border-top: 1px solid #e0e0e0;
         }
         
         @media (max-width: 768px) {
-            .main-content {
+            .task-container {
                 flex-direction: column;
             }
             
-            .file-explorer, .file-viewer {
-                min-width: 100%;
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 1.5rem;
+            }
+            
+            .factor-box {
+                display: block;
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+            
+            .arrow {
+                display: block;
+                margin: 1rem auto;
+                transform: rotate(90deg);
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-link {
+                width: 80%;
+                text-align: center;
+            }
+            
+            .compact-section {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>数据清洗过程可视化</h1>
-            <p class="subtitle">溶解度数据缺失值填补过程</p>
-        </header>
-        
-        <div class="main-content">
-            <div class="file-explorer">
-                <h2>数据文件夹</h2>
-                <div class="folder">
-                    <div class="folder-title">
-                        <span class="folder-icon">📁</span>
-                        data_training
-                    </div>
-                    <div class="file-list" id="file-list">
-                        <!-- 文件列表将通过JavaScript动态生成 -->
-                    </div>
-                </div>
-                
-                <div class="process-info">
-                    <h3>处理进度</h3>
-                    <div id="process-steps">
-                        <!-- 处理步骤将通过JavaScript动态生成 -->
-                    </div>
-                </div>
-                
-                <div class="controls">
-                    <button id="start-btn">开始处理</button>
-                    <button id="pause-btn" disabled>暂停</button>
-                    <button id="reset-btn">重置</button>
-                    
-                    <div class="speed-control">
-                        <label for="speed-slider">处理速度:</label>
-                        <input type="range" id="speed-slider" min="1" max="10" value="5">
-                        <span id="speed-value">中速</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="file-viewer">
-                <h2>文件内容</h2>
-                <div id="current-file">请选择一个文件开始处理</div>
-                
-                <div class="file-content" id="file-content">
-                    <!-- 文件内容将通过JavaScript动态生成 -->
-                </div>
-                
-                <h3>数据表格</h3>
-                <table class="data-table" id="data-table">
-                    <!-- 数据表格将通过JavaScript动态生成 -->
-                </table>
-                
-                <div class="process-info" id="current-process">
-                    <p>等待开始处理...</p>
-                </div>
-                
-                <div class="result-panel">
-                    <h3>处理结果</h3>
-                    <div id="result-content">
-                        <!-- 处理结果将通过JavaScript动态生成 -->
-                    </div>
-                </div>
-            </div>
+    <header>
+        <div class="container">
+            <h1>挑战任务一_天气瓶中的数据科学</h1>
+            <p class="subtitle">发现物质X的结晶奥秘</p>
         </div>
+    </header>
+    
+    <div class="container">
+        <!-- 快速导航 -->
+        <section class="quick-nav">
+            <h3>快速导航</h3>
+            <div class="nav-links">
+                <a href="#background" class="nav-link">赛题背景</a>
+                <a href="#instructions" class="nav-link">任务说明</a>
+                <a href="#dataset" class="nav-link">数据集</a>
+                <a href="#tasks" class="nav-link">核心任务</a>
+                <a href="#results" class="nav-link">结果格式</a>
+                <a href="#excel" class="nav-link">如果是Excel来做？</a>
+            </div>
+        </section>
         
-        <footer>
-        <p>© 2025 庞卉淼、江媛媛、王秋然及AI4S TEEN CUP组委会 </p>
-        </footer>
-    </div>
-
-    <script>
-        // 使用真实数据
-        const sampleFiles = {
-            '5.csv': {
-                name: '5.csv',
-                content: `273.15,278.15,283.15,288.15,293.15,298.15,303.15,308.15,313.15,318.15,323.15,328.15,333.15,338.15,343.15
-0.0112,0.0133,,0.0194,0.0229,0.0264,0.0311,0.0371,0.0543,0.0656,0.0792,0.0976,0.1192,0.1452,0.1761`,
-                data: [
-                    { temperature: 273.15, solubility: 0.0112 },
-                    { temperature: 278.15, solubility: 0.0133 },
-                    { temperature: 283.15, solubility: null },
-                    { temperature: 288.15, solubility: 0.0194 },
-                    { temperature: 293.15, solubility: 0.0229 },
-                    { temperature: 298.15, solubility: 0.0264 },
-                    { temperature: 303.15, solubility: 0.0311 },
-                    { temperature: 308.15, solubility: 0.0371 },
-                    { temperature: 313.15, solubility: 0.0543 },
-                    { temperature: 318.15, solubility: 0.0656 },
-                    { temperature: 323.15, solubility: 0.0792 },
-                    { temperature: 328.15, solubility: 0.0976 },
-                    { temperature: 333.15, solubility: 0.1192 },
-                    { temperature: 338.15, solubility: 0.1452 },
-                    { temperature: 343.15, solubility: 0.1761 }
-                ]
-            },
-            '10.csv': {
-                name: '10.csv',
-                content: `273.15,278.15,283.15,288.15,293.15,298.15,303.15,308.15,313.15,318.15,323.15,328.15,333.15,338.15,343.15
-0.0159,0.0208,0.0247,0.0291,0.0338,0.0406,0.0485,0.0579,0.0842,0.1026,0.1233,0.151,0.1858,,0.2771`,
-                data: [
-                    { temperature: 273.15, solubility: 0.0159 },
-                    { temperature: 278.15, solubility: 0.0208 },
-                    { temperature: 283.15, solubility: 0.0247 },
-                    { temperature: 288.15, solubility: 0.0291 },
-                    { temperature: 293.15, solubility: 0.0338 },
-                    { temperature: 298.15, solubility: 0.0406 },
-                    { temperature: 303.15, solubility: 0.0485 },
-                    { temperature: 308.15, solubility: 0.0579 },
-                    { temperature: 313.15, solubility: 0.0842 },
-                    { temperature: 318.15, solubility: 0.1026 },
-                    { temperature: 323.15, solubility: 0.1233 },
-                    { temperature: 328.15, solubility: 0.151 },
-                    { temperature: 333.15, solubility: 0.1858 },
-                    { temperature: 338.15, solubility: null },
-                    { temperature: 343.15, solubility: 0.2771 }
-                ]
-            },
-            '15.csv': {
-                name: '15.csv',
-                content: `273.15,278.15,283.15,288.15,293.15,298.15,303.15,308.15,313.15,318.15,323.15,328.15,333.15,338.15,343.15
-0.0289,0.0366,0.0461,0.0558,0.0677,0.0809,0.0975,,0.1675,0.2042,0.2475,0.3053,0.3726,0.4597,0.5654`,
-                data: [
-                    { temperature: 273.15, solubility: 0.0289 },
-                    { temperature: 278.15, solubility: 0.0366 },
-                    { temperature: 283.15, solubility: 0.0461 },
-                    { temperature: 288.15, solubility: 0.0558 },
-                    { temperature: 293.15, solubility: 0.0677 },
-                    { temperature: 298.15, solubility: 0.0809 },
-                    { temperature: 303.15, solubility: 0.0975 },
-                    { temperature: 308.15, solubility: null },
-                    { temperature: 313.15, solubility: 0.1675 },
-                    { temperature: 318.15, solubility: 0.2042 },
-                    { temperature: 323.15, solubility: 0.2475 },
-                    { temperature: 328.15, solubility: 0.3053 },
-                    { temperature: 333.15, solubility: 0.3726 },
-                    { temperature: 338.15, solubility: 0.4597 },
-                    { temperature: 343.15, solubility: 0.5654 }
-                ]
-            }
-        };
-        
-        // 执行状态
-        let currentState = {
-            isRunning: false,
-            speed: 5,
-            intervalId: null,
-            currentFileIndex: 0,
-            currentDataIndex: 0,
-            processedFiles: {},
-            fileOrder: ['5.csv', '10.csv', '15.csv']
-        };
-        
-        // 初始化文件列表
-        function initializeFileList() {
-            const fileList = document.getElementById('file-list');
-            fileList.innerHTML = '';
+        <section class="section" id="background">
+            <h2>赛题背景</h2>
+            <p>天气瓶是一种美丽的装饰品，起源于19世纪。它内部的液体会随着环境变化形成不同的结晶图案，有时像羽毛，有时像雪花，非常神奇！</p>
             
-            currentState.fileOrder.forEach((fileName, index) => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                fileItem.id = `file-${fileName}`;
+            <div class="highlight">
+                <p>科学家在未知星球发现了一种神奇的物质<strong>X</strong>，它具有特殊的性质：</p>
+                <ul>
+                    <li>容易溶解在酒精中，但很难溶解在水中</li>
+                    <li>温度越高，它能溶解得越多</li>
+                    <li>当溶解度低于<strong>10克/100克溶剂</strong>时，会形成漂亮的<strong>羽毛状结晶</strong></li>
+                    <li>当溶解度高于<strong>10克/100克溶剂</strong>时，会形成美丽的<strong>雪花状结晶</strong></li>
+                </ul>
+            </div>
+            
+            <div class="visualization">
+                <h3>结晶形态如何形成？</h3>
+                <p>结晶形态主要由<strong>溶解度</strong>决定，而溶解度受两个因素影响：</p>
                 
-                if (index === currentState.currentFileIndex && currentState.isRunning) {
-                    fileItem.classList.add('active');
-                } else if (currentState.processedFiles[fileName]) {
-                    fileItem.classList.add('processed');
-                }
+                <div class="factor-box">
+                    <h4>温度</h4>
+                </div>
                 
-                fileItem.innerHTML = `
-                    <span class="file-icon">📄</span>
-                    <span class="file-name">${fileName}</span>
-                    <span class="file-status ${getFileStatus(fileName)}">${getStatusText(fileName)}</span>
-                `;
+                <span class="arrow">→</span>
                 
-                fileItem.addEventListener('click', () => {
-                    if (!currentState.isRunning) {
-                        showFileContent(fileName);
-                    }
-                });
+                <div class="factor-box">
+                    <h4>乙醇浓度</h4>
+                </div>
                 
-                fileList.appendChild(fileItem);
-            });
+                <span class="arrow">→</span>
+                
+                <div class="factor-box">
+                    <h4>溶解度：决定结晶形态的关键</h4>
+                </div>
+                
+                <span class="arrow">→</span>
+                
+                <div class="factor-box">
+                    <h4>结晶形态</h4>
+                    <p>＜10g → 羽毛状<br>＞10g → 雪花状</p>
+                </div>
+            </div>
             
-            // 初始化处理步骤
-            initializeProcessSteps();
-        }
+        </section>
         
-        // 获取文件状态
-        function getFileStatus(fileName) {
-            if (currentState.processedFiles[fileName]) {
-                return 'status-completed';
-            } else if (currentState.currentFileIndex === currentState.fileOrder.indexOf(fileName) && currentState.isRunning) {
-                return 'status-processing';
-            } else {
-                return 'status-pending';
-            }
-        }
+        <section class="section" id="instructions">
+            <h2>任务说明</h2>
+            
+            <div class="compact-section">
+                <div class="compact-box">
+                    <h4>任务节奏安排</h4>
+                    <div class="step-box">
+                        <h4>统一行动</h4>
+                        <p>老师讲解和演示时，请先认真听讲，保持节奏一致。</p>
+                    </div>
+                    <div class="step-box">
+                        <h4>自由探索</h4>
+                        <p>到'动手练习'时，按自己的速度完成，节奏快的同学可以继续向下查看。</p>
+                    </div>
+                </div>
+                
+                <div class="compact-box">
+                    <h4>同学们的求助系统（三步走）</h4>
+                    <div class="step-box">
+                        <h4><span class="step-number">①</span> 自查</h4>
+                        <p>检查拼写、路径</p>
+                    </div>
+                    <div class="step-box">
+                        <h4><span class="step-number">②</span> 求助同学</h4>
+                        <p>小声讨论，互相检查</p>
+                    </div>
+                    <div class="step-box">
+                        <h4><span class="step-number">③</span> 求助老师</h4>
+                        <p>老师和助教会前来支援</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="highlight" style="margin-top: 1rem; text-align: center;">
+                <strong>我们的目标：一起体验从数据到发现的全过程！</strong>
+            </p>
+        </section>
         
-        // 获取状态文本
-        function getStatusText(fileName) {
-            if (currentState.processedFiles[fileName]) {
-                return '已完成';
-            } else if (currentState.currentFileIndex === currentState.fileOrder.indexOf(fileName) && currentState.isRunning) {
-                return '处理中';
-            } else {
-                return '等待处理';
-            }
-        }
-        
-        // 初始化处理步骤
-        function initializeProcessSteps() {
-            const processSteps = document.getElementById('process-steps');
-            processSteps.innerHTML = '';
+        <section class="section" id="dataset">
+            <h2>数据集说明</h2>
+            <p>打开<strong>data_training</strong>文件夹，你会看到许多CSV文件：</p>
             
-            const steps = [
-                { id: 'step-1', text: '打开文件并读取数据' },
-                { id: 'step-2', text: '检查数据中的缺失值' },
-                { id: 'step-3', text: '填补缺失值' },
-                { id: 'step-4', text: '保存处理后的数据' }
-            ];
+            <div class="folder-structure">
+                <div class="folder">data_training/ (训练数据文件夹)</div>
+                <div class="file">0.csv (乙醇浓度为0%)</div>
+                <div class="file">5.csv (乙醇浓度为5%)</div>
+                <div class="file">10.csv (乙醇浓度为10%)</div>
+                <div class="file">15.csv (乙醇浓度为15%)</div>
+                <div class="file">...</div>
+                <div class="file">100.csv (乙醇浓度为100%)</div>
+            </div>
             
-            steps.forEach((step, index) => {
-                const stepElement = document.createElement('div');
-                stepElement.className = 'process-step';
-                stepElement.id = step.id;
-                stepElement.textContent = `${index + 1}. ${step.text}`;
-                processSteps.appendChild(stepElement);
-            });
-        }
-        
-        // 显示文件内容
-        function showFileContent(fileName) {
-            const file = sampleFiles[fileName];
-            if (!file) return;
+            <p>每个CSV文件包含两行数据：</p>
+            <ul>
+                <li>第一行：温度（单位：开尔文，K）</li>
+                <li>第二行：在该乙醇浓度下，物质X在不同温度下的溶解度（单位：g/100g溶剂）</li>
+            </ul>
             
-            document.getElementById('current-file').textContent = `当前文件: ${fileName}`;
-            
-            // 显示文件内容
-            const fileContent = document.getElementById('file-content');
-            fileContent.textContent = file.content;
-            fileContent.classList.add('file-open');
-            
-            // 显示数据表格
-            displayDataTable(file.data, fileName);
-            
-            // 显示处理信息
-            const processInfo = document.getElementById('current-process');
-            if (currentState.processedFiles[fileName]) {
-                processInfo.innerHTML = `<p>✅ 文件 ${fileName} 已处理完成</p>`;
-            } else {
-                processInfo.innerHTML = `<p>⏳ 文件 ${fileName} 等待处理</p>`;
-            }
-            
-            // 显示处理结果
-            displayResults();
-        }
-        
-        // 显示数据表格
-        function displayDataTable(data, fileName) {
-            const table = document.getElementById('data-table');
-            const processedFile = currentState.processedFiles[fileName];
-            
-            table.innerHTML = `
+            <h3>数据示例：5.csv (乙醇浓度5%)</h3>
+            <table class="data-table">
                 <thead>
                     <tr>
-                        <th>温度 (K)</th>
-                        <th>溶解度 (g)</th>
-                        <th>状态</th>
+                        <th>273.15 K</th>
+                        <th>278.15 K</th>
+                        <th>283.15 K</th>
+                        <th>288.15 K</th>
+                        <th>...</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${data.map((item, index) => {
-                        let solubilityValue;
-                        let status = '正常';
-                        let cellClass = '';
-                        
-                        // 检查是否有填补后的数据
-                        if (processedFile && processedFile.filledData[index] !== null) {
-                            solubilityValue = processedFile.filledData[index];
-                            if (item.solubility === null) {
-                                status = '已填补';
-                                cellClass = 'filled-cell';
-                            }
-                        } else {
-                            solubilityValue = item.solubility;
-                        }
-                        
-                        // 如果是缺失值且未填补
-                        if (solubilityValue === null) {
-                            status = '缺失';
-                            cellClass = 'missing-cell';
-                        }
-                        
-                        // 如果是当前正在处理的数据行
-                        if (currentState.isRunning && 
-                            currentState.fileOrder[currentState.currentFileIndex] === fileName &&
-                            index === currentState.currentDataIndex) {
-                            cellClass = 'current-cell';
-                        }
-                        
-                        return `
-                            <tr>
-                                <td>${item.temperature}</td>
-                                <td class="${cellClass}">${solubilityValue === null ? 'NaN' : solubilityValue.toFixed(4)}</td>
-                                <td>${status}</td>
-                            </tr>
-                        `;
-                    }).join('')}
+                    <tr>
+                        <td>0.0112</td>
+                        <td>0.0133</td>
+                        <td class="missing-value">(缺失)</td>
+                        <td>0.0194</td>
+                        <td>...</td>
+                    </tr>
                 </tbody>
-            `;
-        }
+            </table>
+            
+            <div class="highlight">
+                <p><strong>科学数据的特点：</strong>真实科学环境下的测量数据往往不完美，会有缺失值。</p>
+            </div>
+        </section>
         
-        // 显示处理结果
-        function displayResults() {
-            const resultContent = document.getElementById('result-content');
-            resultContent.innerHTML = '';
+        <section class="section" id="tasks">
+            <h2>四个核心任务</h2>
             
-            if (Object.keys(currentState.processedFiles).length === 0) {
-                resultContent.innerHTML = '<p>暂无处理结果</p>';
-                return;
-            }
-            
-            for (const [fileName, result] of Object.entries(currentState.processedFiles)) {
-                const resultItem = document.createElement('div');
-                resultItem.className = 'result-item';
+            <div class="task-container">
+                <div class="task-card">
+                    <h3 class="task-title"><span class="task-number">1</span>修复数据</h3>
+                    <p>把每个表中缺失的部分补全。</p>
+                    <p>使用相邻数据的平均值来填充缺失值：</p>
+                    <div class="formula">
+                        缺失值 = (左边数据 + 右边数据) ÷ 2
+                    </div>
+                    <p>例如，在5.csv中，283.15K的缺失值计算为：</p>
+                    <p class="formula">(0.0133 + 0.0194) ÷ 2 = 0.01635</p>
+                </div>
                 
-                const missingCount = result.originalData.filter(item => item.solubility === null).length;
-                const filledCount = result.filledData.filter((val, index) => 
-                    result.originalData[index].solubility === null && val !== null
-                ).length;
+                <div class="task-card">
+                    <h3 class="task-title"><span class="task-number">2</span>整合数据</h3>
+                    <p>补全后把各个表整合为一个大表格。</p>
+                    <p>这个表格将体现：</p>
+                    <ul>
+                        <li>乙醇质量分数</li>
+                        <li>温度</li>
+                        <li>溶解度值</li>
+                    </ul>
+                    <p>三者之间的对应关系。</p>
+                </div>
                 
-                resultItem.innerHTML = `
-                    <span>${fileName}</span>
-                    <span>填补了 ${filledCount} 个缺失值</span>
-                `;
+                <div class="task-card">
+                    <h3 class="task-title"><span class="task-number">3</span>找到羽毛晶体条件</h3>
+                    <p>根据完整的数据表，通过临界值筛选：</p>
+                    <ul>
+                        <li>筛选出溶解度 &lt; 10g 的数据点</li>
+                        <li>这些就是能产生羽毛状晶体的条件</li>
+                        <li>整理成新表格，包含三列：</li>
+                        <ol>
+                            <li>溶解度（g）</li>
+                            <li>温度（K）</li>
+                            <li>乙醇浓度（%）</li>
+                        </ol>
+                    </ul>
+                </div>
                 
-                resultContent.appendChild(resultItem);
-            }
-        }
+                <div class="task-card">
+                    <h3 class="task-title"><span class="task-number">4</span>数据可视化</h3>
+                    <p>用热力图（Heatmap）清晰展示所有规律：</p>
+                    <ul>
+                        <li>展示溶解度如何随温度变化</li>
+                        <li>展示溶解度如何随乙醇浓度变化</li>
+                        <li>用不同颜色标记羽毛状和雪花状结晶区域</li>
+                    </ul>
+                    <p>通过图表直观理解数据规律。</p>
+                </div>
+            </div>
+        </section>
         
-        // 高亮处理步骤
-        function highlightProcessStep(stepIndex) {
-            // 重置所有步骤
-            for (let i = 1; i <= 4; i++) {
-                const stepElement = document.getElementById(`step-${i}`);
-                if (stepElement) {
-                    stepElement.style.background = 'white';
-                    stepElement.style.fontWeight = 'normal';
-                }
-            }
+        <section class="section" id="results">
+            <h2>最终结果格式</h2>
+            <p>完成任务后，你需要生成以下两种结果文件：</p>
             
-            // 高亮当前步骤
-            if (stepIndex >= 1 && stepIndex <= 4) {
-                const currentStep = document.getElementById(`step-${stepIndex}`);
-                if (currentStep) {
-                    currentStep.style.background = '#e8f4fd';
-                    currentStep.style.fontWeight = 'bold';
-                }
-            }
-        }
+            <h3>1. 物质X溶解度矩阵</h3>
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>乙醇浓度 (%)</th>
+                        <th>273.15 K</th>
+                        <th>278.15 K</th>
+                        <th>283.15 K</th>
+                        <th>...</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>0</strong></td>
+                        <td>0.0056</td>
+                        <td>0.0066</td>
+                        <td>0.0077</td>
+                        <td>...</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5</strong></td>
+                        <td>0.0112</td>
+                        <td>0.0133</td>
+                        <td>0.0164</td>
+                        <td>...</td>
+                    </tr>
+                    <tr>
+                        <td><strong>...</strong></td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>2. 羽毛状晶体产生条件列表</h3>
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>溶解度 (g)</th>
+                        <th>温度 (K)</th>
+                        <th>乙醇浓度 (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0.0056</td>
+                        <td>273.15</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>0.0066</td>
+                        <td>278.15</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+        </section>
         
-        // 执行下一步
-        function executeNextStep() {
-            if (currentState.currentFileIndex >= currentState.fileOrder.length) {
-                // 所有文件处理完成
-                stopExecution();
-                document.getElementById('current-process').innerHTML = 
-                    '<p>✅ 所有文件处理完成！</p>';
-                return;
-            }
+        <section class="section" id="excel">
+            <h2>Excel模拟步骤</h2>
+            <p>有同学发现，用Excel也可以完成，它的过程是下面这样：</p>
             
-            const currentFileName = currentState.fileOrder[currentState.currentFileIndex];
-            const currentFile = sampleFiles[currentFileName];
+            <div class="highlight">
+                <p><strong>Excel版步骤：</strong></p>
+                <ol>
+                    <li>打开示例CSV文件（如5.csv）</li>
+                    <li>手动计算并填充缺失值</li>
+                    <li>将多个文件的数据整理到一个工作表中</li>
+                    <li>使用排序功能按乙醇浓度排序</li>
+                    <li>应用筛选功能找出溶解度&lt;10的数据点</li>
+                    <li>尝试制作图表展示数据规律</li>
+                </ol>
+            </div>
             
-            // 更新文件列表高亮
-            initializeFileList();
-            
-            // 显示当前文件内容
-            showFileContent(currentFileName);
-            
-            // 根据当前状态执行相应步骤
-            if (!currentState.processedFiles[currentFileName]) {
-                // 第一步：打开文件并读取数据
-                highlightProcessStep(1);
-                document.getElementById('current-process').innerHTML = 
-                    `<p>📂 打开文件 ${currentFileName} 并读取数据...</p>`;
-                
-                // 初始化处理结果
-                currentState.processedFiles[currentFileName] = {
-                    originalData: [...currentFile.data],
-                    filledData: currentFile.data.map(item => item.solubility),
-                    currentIndex: 0
-                };
-                
-                currentState.currentDataIndex = 0;
-            } else {
-                const processedFile = currentState.processedFiles[currentFileName];
-                
-                if (currentState.currentDataIndex < currentFile.data.length) {
-                    // 第二步：检查数据中的缺失值
-                    highlightProcessStep(2);
-                    
-                    const currentData = currentFile.data[currentState.currentDataIndex];
-                    
-                    if (currentData.solubility === null) {
-                        // 第三步：填补缺失值
-                        highlightProcessStep(3);
-                        
-                        // 查找前一个有效值
-                        let prevVal = null;
-                        for (let i = currentState.currentDataIndex - 1; i >= 0; i--) {
-                            if (currentFile.data[i].solubility !== null) {
-                                prevVal = currentFile.data[i].solubility;
-                                break;
-                            }
-                        }
-                        
-                        // 查找后一个有效值
-                        let nextVal = null;
-                        for (let i = currentState.currentDataIndex + 1; i < currentFile.data.length; i++) {
-                            if (currentFile.data[i].solubility !== null) {
-                                nextVal = currentFile.data[i].solubility;
-                                break;
-                            }
-                        }
-                        
-                        if (prevVal !== null && nextVal !== null) {
-                            const avg = (prevVal + nextVal) / 2;
-                            processedFile.filledData[currentState.currentDataIndex] = avg;
-                            
-                            document.getElementById('current-process').innerHTML = `
-                                <p>🔧 填补缺失值: 位置 ${currentState.currentDataIndex + 1} (${currentData.temperature}K)</p>
-                                <p>使用前值 ${prevVal.toFixed(4)} 和后值 ${nextVal.toFixed(4)} 的平均值 ${avg.toFixed(4)}</p>
-                            `;
-                        } else {
-                            document.getElementById('current-process').innerHTML = 
-                                `<p>⚠️ 无法填补位置 ${currentState.currentDataIndex + 1} 的缺失值 (缺少前后有效值)</p>`;
-                        }
-                    } else {
-                        document.getElementById('current-process').innerHTML = 
-                            `<p>✓ 位置 ${currentState.currentDataIndex + 1} 的值正常: ${currentData.solubility.toFixed(4)}</p>`;
-                    }
-                    
-                    currentState.currentDataIndex++;
-                } else {
-                    // 第四步：保存处理后的数据
-                    highlightProcessStep(4);
-                    document.getElementById('current-process').innerHTML = 
-                        `<p>💾 文件 ${currentFileName} 处理完成，保存结果...</p>`;
-                    
-                    // 移动到下一个文件
-                    currentState.currentFileIndex++;
-                    currentState.currentDataIndex = 0;
-                }
-            }
-            
-            // 更新数据表格显示
-            displayDataTable(currentFile.data, currentFileName);
-        }
-        
-        // 开始执行
-        function startExecution() {
-            if (currentState.isRunning) return;
-            
-            currentState.isRunning = true;
-            document.getElementById('start-btn').disabled = true;
-            document.getElementById('pause-btn').disabled = false;
-            
-            const speedMap = {
-                1: 2000, 2: 1500, 3: 1200, 4: 1000, 5: 800,
-                6: 600, 7: 400, 8: 300, 9: 200, 10: 100
-            };
-            
-            currentState.intervalId = setInterval(executeNextStep, speedMap[currentState.speed]);
-        }
-        
-        // 暂停执行
-        function pauseExecution() {
-            if (!currentState.isRunning) return;
-            
-            currentState.isRunning = false;
-            clearInterval(currentState.intervalId);
-            document.getElementById('start-btn').disabled = false;
-            document.getElementById('pause-btn').disabled = true;
-        }
-        
-        // 停止执行
-        function stopExecution() {
-            currentState.isRunning = false;
-            clearInterval(currentState.intervalId);
-            document.getElementById('start-btn').disabled = false;
-            document.getElementById('pause-btn').disabled = true;
-        }
-        
-        // 重置执行
-        function resetExecution() {
-            stopExecution();
-            currentState = {
-                isRunning: false,
-                speed: 5,
-                intervalId: null,
-                currentFileIndex: 0,
-                currentDataIndex: 0,
-                processedFiles: {},
-                fileOrder: ['5.csv', '10.csv', '15.csv']
-            };
-            
-            initializeFileList();
-            document.getElementById('current-file').textContent = '请选择一个文件开始处理';
-            document.getElementById('file-content').textContent = '';
-            document.getElementById('data-table').innerHTML = '';
-            document.getElementById('current-process').innerHTML = '<p>等待开始处理...</p>';
-            document.getElementById('result-content').innerHTML = '<p>暂无处理结果</p>';
-            
-            highlightProcessStep(0);
-        }
-        
-        // 初始化页面
-        window.onload = function() {
-            initializeFileList();
-            
-            // 默认显示第一个文件
-            showFileContent('5.csv');
-            
-            // 事件监听
-            document.getElementById('start-btn').addEventListener('click', startExecution);
-            document.getElementById('pause-btn').addEventListener('click', pauseExecution);
-            document.getElementById('reset-btn').addEventListener('click', resetExecution);
-            
-            document.getElementById('speed-slider').addEventListener('input', function() {
-                currentState.speed = parseInt(this.value);
-                const speedText = ['很慢', '慢', '较慢', '稍慢', '中速', '稍快', '较快', '快', '很快', '最快'];
-                document.getElementById('speed-value').textContent = speedText[currentState.speed - 1];
-                
-                // 如果正在执行，重新设置间隔
-                if (currentState.isRunning) {
-                    pauseExecution();
-                    startExecution();
-                }
-            });
-        };
-    </script>
+            <p>Excel手动操作会更清楚地理解数据处理的每一步，但我们在这个任务中用更加数据科学的方式来完成！</p>
+        </section>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>© 2025 庞卉淼、江媛媛、王秋然及AI4S TEEN CUP组委会</p>
+        </div>
+    </footer>
 </body>
 </html>
