@@ -42,24 +42,20 @@ AI4S 青少年人工智能驱动科学挑战营 · 官方开源课程资源库
 > 科学导师 & AI导师联合设计  
 > 在真实科研语境中习得科学与智能融合思维  
   
-## 📂 仓库结构 / Repository Structure  
-  
-| Folder | 内容说明 | 更新状态 |  
-|--------|---------|:------:|  
-| `/html/` | 教学网页与可交互示例 | 🛠️ |  
-| `/lessons/` | 讲义、任务文档、资源清单 | 🛠️ |  
-| `/notebooks/` | 实验 Notebook 与模型样例 | 🛠️ |  
-| `/projects/` | 学生项目示例与成果展示 | 🛠️ |  
-| `/data/` | 科学数据与案例素材 | 🛠️ |  
-  
-> 将随课程进度逐步公开，欢迎 Star⭐关注更新  
-  
 ## 💻 在线访问 / Online Demos  
   
 交互式 HTML 资源将上线 GitHub Pages：  
-🔗 Coming Soon…  
-  
-> 支持中国大陆网络稳定访问  
+
+**任务一：天气瓶中的数据科学**
+
+[👉 赛题发布](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/challenge-announcement.html)
+
+[✨ 数据清洗过程可视化](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/data-cleaning-visualization.html)
+
+[🔄 数据转置演示](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/data-transpose.html)
+
+[🧩 逻辑梳理互动](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/logic-interactive.html)
+
   
 ## 🧠 支持平台 / Technical Support  
   

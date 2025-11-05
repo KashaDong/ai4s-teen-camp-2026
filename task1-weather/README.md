@@ -1,11 +1,11 @@
-# Task 1 Weather Folder
+# 任务一：天气瓶数据科学
 
-This folder contains the renamed files for Task 1: Weather Bottle Data Science.
+该文件夹包含“挑战任务一：天气瓶中的数据科学”相关的课程资源文件。
 
-## File Mapping (Chinese to English)
+## 文件命名对应表（中文 → 英文）
 
-| Chinese filename | English filename |
-|---|---|
+| 原中文文件名 | 对应英文文件名 |
+| --- | --- |
 | 01_挑战任务一_天气瓶中的数据科学.ipynb | 01_overview.ipynb |
 | 02_挑战任务一_天气瓶中的数据科学_学习手册.ipynb | 02_guide.ipynb |
 | 03_挑战任务一_天气瓶中的数据科学_baseline.ipynb | 03_baseline.ipynb |
@@ -17,6 +17,6 @@ This folder contains the renamed files for Task 1: Weather Bottle Data Science.
 | data_training | data-training |
 | data_validation | data-validation |
 
-### Description
+### 说明
 
-This README provides a mapping between the original Chinese filenames and their corresponding English filenames in this directory.
+本 README 用于展示目录中文件的**中文命名**与**英文命名**的对应关系，以便统一管理与使用。
