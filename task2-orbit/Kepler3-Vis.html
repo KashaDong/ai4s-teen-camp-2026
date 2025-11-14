@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太阳系行星轨道周期与半径关系可视化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#10b981',
+                        accent: '#8b5cf6',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-all-300 {
+                transition: all 300ms ease-in-out;
+            }
+        }
+    </style>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .slider-container {
+            position: relative;
+            width: 100%;
+            padding: 0 10px;
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .slider::-webkit-slider-thumb:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+        }
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        .slider::-moz-range-thumb:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+        }
+        .planet-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .planet-table th, .planet-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .planet-table th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+        .planet-table tr:hover {
+            background-color: #f8fafc;
+        }
+        .value-display {
+            font-family: monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+        .planet-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .planet-marker:hover {
+            transform: translate(-50%, -50%) scale(1.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 顶部标题区 -->
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-primary mb-2 text-shadow">太阳系行星轨道周期与半径关系可视化</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                本可视化工具展示了太阳系八大行星的轨道半径（r）与运行周期（T）之间的关系，通过散点图呈现行星实际数据，并基于公式 T = k·r^a 绘制函数图像。
+                您可以调节待定系数 k 和 a，观察函数曲线与实际数据的拟合效果。
+            </p>
+        </header>
+
+        <!-- 主要内容区 -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 左侧数据展示区 -->
+            <div class="lg:col-span-1 bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-dark flex items-center">
+                    <i class="fa fa-table mr-2 text-primary"></i>行星数据
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="planet-table">
+                        <thead>
+                            <tr>
+                                <th>行星</th>
+                                <th>轨道半径 (AU)</th>
+                                <th>运行周期 (年)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="planet-data">
+                            <!-- 行星数据将通过JavaScript动态填充 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <h3 class="text-lg font-medium text-primary mb-2">数据说明</h3>
+                    <ul class="text-gray-700 space-y-1 text-sm">
+                        <li><strong>轨道半径</strong>：以天文单位（AU）表示，1 AU 等于地球到太阳的平均距离（约1.5亿公里）</li>
+                        <li><strong>运行周期</strong>：以地球年为单位，表示行星绕太阳公转一周所需的时间</li>
+                        <li><strong>数据来源</strong>：NASA 太阳系行星物理参数</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 右侧图像展示区 -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-dark flex items-center">
+                    <i class="fa fa-line-chart mr-2 text-primary"></i>轨道周期与半径关系图
+                </h2>
+                
+                <!-- 图像容器 -->
+                <div class="relative w-full" style="height: 400px;">
+                    <canvas id="visualization-canvas" class="w-full h-full"></canvas>
+                    <div id="tooltip" class="tooltip"></div>
+                    <div id="planet-markers-container" class="absolute top-0 left-0 w-full h-full pointer-events-none"></div>
+                </div>
+                
+                <!-- 交互控制区 -->
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="k-value" class="block text-sm font-medium text-gray-700 mb-2">
+                            k 值: <span id="k-value-display" class="value-display text-primary">0.00</span>
+                        </label>
+                        <div class="slider-container">
+                            <input type="range" id="k-value" class="slider" min="-5" max="5" step="0.01" value="0.00">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="a-value" class="block text-sm font-medium text-gray-700 mb-2">
+                            a 值: <span id="a-value-display" class="value-display text-secondary">1.00</span>
+                        </label>
+                        <div class="slider-container">
+                            <input type="range" id="a-value" class="slider" min="-5" max="5" step="0.01" value="1.00">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 公式展示区 -->
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 class="text-lg font-medium text-dark mb-2">当前函数公式</h3>
+                    <div class="text-center py-2">
+                        <span class="text-xl font-serif">T = </span>
+                        <span id="formula-k" class="text-xl font-serif text-primary">1.00</span>
+                        <span class="text-xl font-serif">· r<sup id="formula-a" class="text-secondary">1.50</sup></span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2">
+                        <strong>提示</strong>：根据开普勒第三定律，对于太阳系行星，a 值理论上应为 1.5（即 T² ∝ r³）。
+                        尝试调整滑块，观察函数曲线与实际行星数据点的拟合情况。
+                    </p>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部说明区 -->
+        <footer class="mt-12 bg-white rounded-xl shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4 text-dark flex items-center">
+                <i class="fa fa-info-circle mr-2 text-primary"></i>公式意义与操作说明
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-medium text-primary mb-2">开普勒第三定律</h3>
+                    <p class="text-gray-700 mb-4">
+                        开普勒第三定律（周期定律）指出：行星轨道周期的平方与其轨道半长轴的立方成正比。
+                        数学表达式为：T² ∝ r³，或 T = k·r^(3/2)，其中 k 是一个常数。
+                    </p>
+                    <p class="text-gray-700">
+                        这一定律揭示了行星运动的规律性，是牛顿万有引力定律的重要基础。通过本可视化工具，
+                        您可以直观地验证这一定律，并理解常数 k 和指数 a 对函数曲线的影响。
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-primary mb-2">操作指南</h3>
+                    <ul class="text-gray-700 space-y-2">
+                        <li class="flex items-start">
+                            <i class="fa fa-sliders text-secondary mt-1 mr-2"></i>
+                            <span>使用滑块调节 k 和 a 的值，观察函数曲线的变化</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-mouse-pointer text-secondary mt-1 mr-2"></i>
+                            <span>将鼠标悬停在数据点上，查看行星的详细信息</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-refresh text-secondary mt-1 mr-2"></i>
+                            <span>点击"重置参数"按钮恢复默认值（k=1.00, a=1.50）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-info-circle text-secondary mt-1 mr-2"></i>
+                            <span>参考表格数据，比较实际值与理论计算值的差异</span>
+                        </li>
+                    </ul>
+                    <button id="reset-button" class="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 transition-all-300 flex items-center">
+                        <i class="fa fa-refresh mr-2"></i>重置参数
+                    </button>
+                </div>               
+            </div>
+          </div>
+              <h4 class="text-gray-700 mb-4 text-center">© 2025 李怡然、杨阳、李秉蔚、刘潇及AI4S TEEN CAMP组委会。</h4>
+<p class="text-gray-700 mb-4 text-center">本教学材料仅供课堂教学与学术交流使用，未经书面许可，不得用于任何商业用途。</p>
+            </h4>
+        </footer>
+    </div>
+
+    <script>
+        // 行星数据
+        const planetData = [
+            { name: "水星", radius: 0.387, period: 0.241, color: "#bdc3c7" },
+            { name: "金星", radius: 0.723, period: 0.615, color: "#e67e22" },
+            { name: "地球", radius: 1.000, period: 1.000, color: "#3498db" },
+            { name: "火星", radius: 1.524, period: 1.881, color: "#e74c3c" },
+            { name: "木星", radius: 5.203, period: 11.862, color: "#f39c12" },
+            { name: "土星", radius: 9.537, period: 29.457, color: "#d35400" },
+            { name: "天王星", radius: 19.191, period: 84.011, color: "#1abc9c" },
+            { name: "海王星", radius: 30.069, period: 164.790, color: "#3498db" }
+        ];
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 填充行星数据表格
+            populatePlanetTable();
+            
+            // 初始化可视化
+            initializeVisualization();
+            
+            // 初始化交互控件
+            initializeControls();
+        });
+
+        // 填充行星数据表格
+        function populatePlanetTable() {
+            const tableBody = document.getElementById('planet-data');
+            
+            planetData.forEach(planet => {
+                const row = document.createElement('tr');
+                
+                // 行星名称
+                const nameCell = document.createElement('td');
+                nameCell.textContent = planet.name;
+                nameCell.className = 'font-medium';
+                row.appendChild(nameCell);
+                
+                // 轨道半径
+                const radiusCell = document.createElement('td');
+                radiusCell.textContent = planet.radius.toFixed(3);
+                row.appendChild(radiusCell);
+                
+                // 运行周期
+                const periodCell = document.createElement('td');
+                periodCell.textContent = planet.period.toFixed(3);
+                row.appendChild(periodCell);
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 初始化可视化
+        function initializeVisualization() {
+            const canvas = document.getElementById('visualization-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 设置Canvas尺寸
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // 初始参数
+            let k = 0;
+            let a = 1;
+            
+            // 绘制初始图像
+            drawVisualization(ctx, k, a);
+            
+            // 更新公式显示
+            updateFormulaDisplay(k, a);
+            
+            // 保存更新函数，以便后续调用
+            window.updateVisualization = function(newK, newA) {
+                k = newK;
+                a = newA;
+                drawVisualization(ctx, k, a);
+                updateFormulaDisplay(k, a);
+            };
+        }
+
+        // 调整Canvas尺寸
+        function resizeCanvas() {
+            const canvas = document.getElementById('visualization-canvas');
+            const container = canvas.parentElement;
+            
+            // 设置Canvas尺寸为容器尺寸
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // 重新绘制可视化
+            const k = parseFloat(document.getElementById('k-value').value);
+            const a = parseFloat(document.getElementById('a-value').value);
+            drawVisualization(canvas.getContext('2d'), k, a);
+        }
+
+        // 绘制可视化
+        function drawVisualization(ctx, k, a) {
+            const canvas = ctx.canvas;
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 定义坐标轴范围和边距
+            const margin = { top: 40, right: 40, bottom: 60, left: 60 };
+            const plotWidth = width - margin.left - margin.right;
+            const plotHeight = height - margin.top - margin.bottom;
+            
+            // 计算数据范围（使用线性刻度）
+            const minRadius = Math.min(...planetData.map(p => p.radius));
+            const maxRadius = Math.max(...planetData.map(p => p.radius));
+            const minPeriod = Math.min(...planetData.map(p => p.period));
+            const maxPeriod = Math.max(...planetData.map(p => p.period));
+            
+            // 扩展数据范围，留出一些边距
+            const extendedMinRadius = minRadius * 0.9;
+            const extendedMaxRadius = maxRadius * 1.1;
+            const extendedMinPeriod = minPeriod * 0.9;
+            const extendedMaxPeriod = maxPeriod * 1.1;
+            
+            // 定义坐标转换函数（线性刻度）
+            const xScale = (r) => margin.left + plotWidth * (r - extendedMinRadius) / (extendedMaxRadius - extendedMinRadius);
+            const yScale = (t) => margin.top + plotHeight * (1 - (t - extendedMinPeriod) / (extendedMaxPeriod - extendedMinPeriod));
+            
+            // 绘制背景网格
+            drawGrid(ctx, margin, plotWidth, plotHeight, extendedMinRadius, extendedMaxRadius, extendedMinPeriod, extendedMaxPeriod, xScale, yScale);
+            
+            // 绘制坐标轴
+            drawAxes(ctx, margin, plotWidth, plotHeight, extendedMinRadius, extendedMaxRadius, extendedMinPeriod, extendedMaxPeriod, xScale, yScale);
+            
+            // 绘制函数曲线 T = k * r^a
+            drawFunctionCurve(ctx, k, a, margin, plotWidth, extendedMinRadius, extendedMaxRadius, xScale, yScale);
+            
+            // 绘制行星数据点
+            drawPlanetDataPoints(ctx, planetData, xScale, yScale);
+        }
+
+        // 绘制背景网格
+        function drawGrid(ctx, margin, plotWidth, plotHeight, minRadius, maxRadius, minPeriod, maxPeriod, xScale, yScale) {
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            
+            // 垂直网格线
+            const numVerticalLines = 10;
+            for (let i = 0; i <= numVerticalLines; i++) {
+                const r = minRadius + i * (maxRadius - minRadius) / numVerticalLines;
+                const x = xScale(r);
+                
+                ctx.beginPath();
+                ctx.moveTo(x, margin.top);
+                ctx.lineTo(x, margin.top + plotHeight);
+                ctx.stroke();
+            }
+            
+            // 水平网格线
+            const numHorizontalLines = 8;
+            for (let i = 0; i <= numHorizontalLines; i++) {
+                const t = minPeriod + i * (maxPeriod - minPeriod) / numHorizontalLines;
+                const y = yScale(t);
+                
+                ctx.beginPath();
+                ctx.moveTo(margin.left, y);
+                ctx.lineTo(margin.left + plotWidth, y);
+                ctx.stroke();
+            }
+        }
+
+        // 绘制坐标轴
+        function drawAxes(ctx, margin, plotWidth, plotHeight, minRadius, maxRadius, minPeriod, maxPeriod, xScale, yScale) {
+            const width = ctx.canvas.width;
+            const height = ctx.canvas.height;
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2;
+            
+            // X轴
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top + plotHeight);
+            ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
+            ctx.stroke();
+            
+            // Y轴
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top);
+            ctx.lineTo(margin.left, margin.top + plotHeight);
+            ctx.stroke();
+            
+            // 坐标轴箭头
+            ctx.beginPath();
+            ctx.moveTo(margin.left + plotWidth, margin.top + plotHeight);
+            ctx.lineTo(margin.left + plotWidth - 10, margin.top + plotHeight - 5);
+            ctx.lineTo(margin.left + plotWidth - 10, margin.top + plotHeight + 5);
+            ctx.closePath();
+            ctx.fillStyle = '#1e293b';
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top);
+            ctx.lineTo(margin.left - 5, margin.top + 10);
+            ctx.lineTo(margin.left + 5, margin.top + 10);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 坐标轴标签
+            ctx.fillStyle = '#1e293b';
+            ctx.font = '14px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('轨道半径 (AU)', margin.left + plotWidth / 2, height - 20);
+            
+            ctx.save();
+            ctx.translate(margin.left - 30, margin.top + plotHeight / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.textAlign = 'center';
+            ctx.fillText('运行周期 (年)', 0, 0);
+            ctx.restore();
+            
+            // 坐标轴刻度
+            ctx.font = '12px Inter, sans-serif';
+            
+            // X轴刻度
+            const xTickStep = (maxRadius - minRadius) / 8;
+            for (let i = 0; i <= 8; i++) {
+                const r = minRadius + i * xTickStep;
+                const x = xScale(r);
+                
+                ctx.beginPath();
+                ctx.moveTo(x, margin.top + plotHeight);
+                ctx.lineTo(x, margin.top + plotHeight + 5);
+                ctx.stroke();
+                
+                ctx.textAlign = 'center';
+                ctx.fillText(r.toFixed(1), x, margin.top + plotHeight + 20);
+            }
+            
+            // Y轴刻度
+            const yTickStep = (maxPeriod - minPeriod) / 8;
+            for (let i = 0; i <= 8; i++) {
+                const t = minPeriod + i * yTickStep;
+                const y = yScale(t);
+                
+                ctx.beginPath();
+                ctx.moveTo(margin.left - 5, y);
+                ctx.lineTo(margin.left, y);
+                ctx.stroke();
+                
+                ctx.textAlign = 'right';
+                ctx.fillText(t.toFixed(1), margin.left - 10, y + 4);
+            }
+        }
+
+        // 绘制函数曲线 T = k * r^a
+        function drawFunctionCurve(ctx, k, a, margin, plotWidth, minRadius, maxRadius, xScale, yScale) {
+            // 计算函数曲线上的点
+            const numPoints = 200;
+            const points = [];
+            
+            for (let i = 0; i <= numPoints; i++) {
+                const r = minRadius + i * (maxRadius - minRadius) / numPoints;
+                const t = k * Math.pow(r, a);
+                
+                // 只添加在合理范围内的点
+                if (t > 0) {
+                    points.push({ x: xScale(r), y: yScale(t) });
+                }
+            }
+            
+            // 绘制函数曲线
+            if (points.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                
+                for (let i = 1; i < points.length; i++) {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+                
+                ctx.strokeStyle = '#8b5cf6';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // 添加曲线透明度渐变
+                const gradient = ctx.createLinearGradient(
+                    points[0].x, points[0].y,
+                    points[points.length - 1].x, points[points.length - 1].y
+                );
+                gradient.addColorStop(0, 'rgba(139, 92, 246, 0.2)');
+                gradient.addColorStop(1, 'rgba(139, 92, 246, 0.8)');
+                
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 5;
+                ctx.stroke();
+            }
+        }
+
+        // 绘制行星数据点
+        function drawPlanetDataPoints(ctx, planets, xScale, yScale) {
+            const markerContainer = document.getElementById('planet-markers-container');
+            markerContainer.innerHTML = '';
+            
+            planets.forEach(planet => {
+                const x = xScale(planet.radius);
+                const y = yScale(planet.period);
+                
+                // 绘制数据点
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.fillStyle = planet.color;
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // 添加行星名称标签
+                ctx.fillStyle = '#1e293b';
+                ctx.font = '12px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(planet.name, x, y - 12);
+                
+                // 添加交互标记
+                const marker = document.createElement('div');
+                marker.className = 'planet-marker';
+                marker.style.left = `${x}px`;
+                marker.style.top = `${y}px`;
+                marker.style.backgroundColor = planet.color;
+                marker.style.pointerEvents = 'auto';
+                
+                // 添加鼠标悬停事件
+                marker.addEventListener('mouseover', function(event) {
+                    const tooltip = document.getElementById('tooltip');
+                    tooltip.innerHTML = `
+                        <div><strong>${planet.name}</strong></div>
+                        <div>轨道半径: ${planet.radius.toFixed(3)} AU</div>
+                        <div>运行周期: ${planet.period.toFixed(3)} 年</div>
+                    `;
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = `${event.pageX + 10}px`;
+                    tooltip.style.top = `${event.pageY + 10}px`;
+                });
+                
+                marker.addEventListener('mousemove', function(event) {
+                    const tooltip = document.getElementById('tooltip');
+                    tooltip.style.left = `${event.pageX + 10}px`;
+                    tooltip.style.top = `${event.pageY + 10}px`;
+                });
+                
+                marker.addEventListener('mouseout', function() {
+                    const tooltip = document.getElementById('tooltip');
+                    tooltip.style.display = 'none';
+                });
+                
+                markerContainer.appendChild(marker);
+            });
+        }
+
+        // 更新公式显示
+        function updateFormulaDisplay(k, a) {
+            document.getElementById('formula-k').textContent = k.toFixed(2);
+            document.getElementById('formula-a').textContent = a.toFixed(2);
+        }
+
+        // 初始化交互控件
+        function initializeControls() {
+            const kSlider = document.getElementById('k-value');
+            const aSlider = document.getElementById('a-value');
+            const kDisplay = document.getElementById('k-value-display');
+            const aDisplay = document.getElementById('a-value-display');
+            const resetButton = document.getElementById('reset-button');
+            
+            // 更新显示值
+            kDisplay.textContent = kSlider.value;
+            aDisplay.textContent = aSlider.value;
+            
+            // 添加滑块事件监听
+            kSlider.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                kDisplay.textContent = value.toFixed(2);
+                window.updateVisualization(value, parseFloat(aSlider.value));
+            });
+            
+            aSlider.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                aDisplay.textContent = value.toFixed(2);
+                window.updateVisualization(parseFloat(kSlider.value), value);
+            });
+            
+            // 添加重置按钮事件监听
+            resetButton.addEventListener('click', function() {
+                kSlider.value = 1.00;
+                aSlider.value = 1.50;
+                kDisplay.textContent = '1.00';
+                aDisplay.textContent = '1.50';
+                window.updateVisualization(1.00, 1.50);
+            });
+        }
+    </script>
+</body>
+</html>

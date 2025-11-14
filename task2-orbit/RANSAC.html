@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+   
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RANSAC 算法单次迭代可视化</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1,
+        h3 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        #controls {
+            flex: 1;
+            min-width: 300px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        #visualization {
+            flex: 1;
+            min-width: 400px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .control-group input {
+            width: calc(100% - 20px);
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 8px;
+        }
+
+
+        fieldset {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        legend {
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        button {
+            border: none;
+            padding: 12px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button#stepButton {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        button#stepButton:hover {
+            background-color: #27ae60;
+        }
+
+        button#regenerateButton {
+            background-color: #e67e22;
+            color: white;
+        }
+
+        button#regenerateButton:hover {
+            background-color: #d35400;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        #statusText {
+            text-align: center;
+            font-size: 1.1em;
+            color: #555;
+            margin-top: 15px;
+            min-height: 1.2em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>RANSAC 算法单次迭代可视化</h1>
+
+    <div class="container">
+        <div id="controls">
+            <fieldset>
+                <legend>RANSAC 可调参数</legend>
+                <div class="control-group">
+                    <label for="minSamples">最少样本数 (min_samples)</label>
+                    <input type="number" id="minSamples" value="2" step="1" min="2">
+                </div>
+                <div class="control-group">
+                    <label for="threshold">内点阈值 (threshold)</label>
+                    <input type="number" id="threshold" value="0.1" step="0.01" min="0">
+                </div>
+            </fieldset>
+
+            <button id="stepButton">Step 1: 随机采样 (Random Sample)</button>
+            <button id="regenerateButton">重新生成数据 (Regenerate Data)</button>
+
+        </div>
+
+        <div id="visualization">
+            <canvas id="ransacChart"></canvas>
+            <p id="statusText">数据已生成。请开始 RANSAC 步骤。</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 陈聪颖、李秉蔚、杨阳、李怡然、刘潇及AI4S TEEN CAMP组委会 </p>
+        </div>
+
+    </div>
+
+    <script>
+        // 等待 Chart.js 加载完成后再执行代码
+        function initApp() {
+            // --- 全局变量 ---
+            let chart;
+            let allData = []; // 存储所有 {x, y} 点
+            let samplePoints = []; // 存储随机采样的点
+            let model = {}; // 存储 {m, c}
+            let ransacState = 0; // 0: initial, 1: sampled, 2: fitted, 3: classified
+
+            // --- 图表坐标范围 ---
+            const CHART_X_MIN = 0;
+            const CHART_X_MAX = 5;
+
+            // --- DOM 元素引用 ---
+            const regenerateBtn = document.getElementById('regenerateButton');
+            const stepBtn = document.getElementById('stepButton');
+            const statusText = document.getElementById('statusText');
+            const ctx = document.getElementById('ransacChart').getContext('2d');
+            const minSamplesInput = document.getElementById('minSamples');
+            const thresholdInput = document.getElementById('threshold');
+
+            // --- 事件监听 ---
+            regenerateBtn.addEventListener('click', generateData);
+            stepBtn.addEventListener('click', runRansacStep);
+
+            // --- 图表样式定义 (模仿 Python 代码) ---
+            const styles = {
+                initial: {
+                    label: 'All Data',
+                    backgroundColor: 'rgba(128, 128, 128, 0.5)',
+                    borderColor: 'rgba(128, 128, 128, 1)',
+                    pointRadius: 3, // 对应 s=10
+                    pointHoverRadius: 5,
+                },
+                sample: {
+                    label: 'Randomly Selected Samples',
+                    backgroundColor: 'purple',
+                    borderColor: 'purple',
+                    pointRadius: 10, // 对应 s=300
+                    pointHoverRadius: 12,
+                    pointStyle: 'star',
+                },
+                inlier: {
+                    label: 'Inliers',
+                    backgroundColor: 'green',
+                    borderColor: 'green',
+                    pointRadius: 3, // 对应 s=10
+                    pointHoverRadius: 5,
+                },
+                outlier: {
+                    label: 'Outliers',
+                    backgroundColor: 'red',
+                    borderColor: 'red',
+                    pointRadius: 3, // 对应 s=10
+                    pointHoverRadius: 5,
+                },
+                modelLine: {
+                    label: 'Fitted Line from Samples',
+                    borderColor: 'blue',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0,
+                    pointRadius: 0,
+                    type: 'line',
+                }
+            };
+
+            // --- 核心功能函数 ---
+
+            /**
+             * 1. 生成数据 (硬编码参数)
+             * (斜率均为正，噪声较小)
+             */
+            function generateData() {
+                allData = [];
+
+                // 固定参数
+                const params = {
+                    m1: 1.5, c1: 0.5, num1: 200, noise1: 0.08, // 直线 1 (内点)
+                    m2: 0.8, c2: 2.5, num2: 50, noise2: 0.1,  // 直线 2 (外点)
+                };
+
+                // 生成直线 1 的点
+                for (let i = 0; i < params.num1; i++) {
+                    const x = Math.random() * CHART_X_MAX;
+                    const y_noise = (Math.random() - 0.5) * 2 * params.noise1;
+                    const y = params.m1 * x + params.c1 + y_noise;
+                    allData.push({ x, y });
+                }
+
+                // 生成直线 2 的点
+                for (let i = 0; i < params.num2; i++) {
+                    const x = Math.random() * CHART_X_MAX;
+                    const y_noise = (Math.random() - 0.5) * 2 * params.noise2;
+                    const y = params.m2 * x + params.c2 + y_noise;
+                    allData.push({ x, y });
+                }
+
+                resetState();
+                updateChart([
+                    { ...styles.initial, data: allData, label: `All Data (${allData.length} points)` }
+                ]);
+                statusText.textContent = `数据已生成。请开始 RANSAC 步骤。`;
+                stepBtn.disabled = false;
+            }
+
+            /**
+             * 2. 执行 RANSAC 步骤
+             */
+            function runRansacStep() {
+                switch (ransacState) {
+                    case 0:
+                        // 步骤 1: 随机采样
+                        step1_RandomSample();
+                        ransacState = 1;
+                        break;
+                    case 1:
+                        // 步骤 2: 拟合模型
+                        step2_FitModel();
+                        stepBtn.textContent = 'Step 3: 判断内点 (Find Inliers)';
+                        ransacState = 2;
+                        break;
+                    case 2:
+                        // 步骤 3: 判断内点
+                        const counts = step3_ClassifyPoints();
+                        statusText.textContent = `步骤 3: 找到 ${counts.inliers} 个内点 (绿色) 和 ${counts.outliers} 个外点 (红色)。`;
+                        stepBtn.textContent = '重置步骤 (Reset Step)';
+                        ransacState = 3;
+                        break;
+                    case 3:
+                        // 重置迭代
+                        resetState();
+                        updateChart([
+                            { ...styles.initial, data: allData, label: `All Data (${allData.length} points)` }
+                        ]);
+                        break;
+                }
+            }
+
+            /**
+             * 步骤 1: 随机采样
+             */
+            function step1_RandomSample() {
+                const min_samples = parseInt(minSamplesInput.value);
+                if (min_samples > allData.length) {
+                    statusText.textContent = "错误：min_samples 不能大于总点数。";
+                    return;
+                }
+
+                samplePoints = [];
+                const indices = new Set();
+                while (indices.size < min_samples) {
+                    const index = Math.floor(Math.random() * allData.length);
+                    indices.add(index);
+                }
+
+                samplePoints = Array.from(indices).map(i => allData[i]);
+
+                updateChart([
+                    { ...styles.initial, data: allData },
+                    { ...styles.sample, data: samplePoints }
+                ]);
+
+                statusText.textContent = `步骤 1: 随机选择了 ${min_samples} 个样本点 (紫色星星)。`;
+                stepBtn.textContent = 'Step 2: 拟合模型 (Fit Model)';
+            }
+
+            /**
+             * 步骤 2: 拟合模型 (直线)
+             * (使用最小二乘法，等效于 np.polyfit(..., 1))
+             */
+            function step2_FitModel() {
+                // 计算拟合直线所需的和
+                let sum_x = 0, sum_y = 0, sum_xy = 0, sum_xx = 0;
+                const n = samplePoints.length;
+
+                for (const p of samplePoints) {
+                    sum_x += p.x;
+                    sum_y += p.y;
+                    sum_xy += p.x * p.y;
+                    sum_xx += p.x * p.x;
+                }
+
+                // 计算斜率 (m) 和截距 (c)
+                const denominator = (n * sum_xx - sum_x * sum_x);
+                // 避免除以零 (如果所有 x 都相同)
+                const m = (Math.abs(denominator) < 1e-6) ? 0 : (n * sum_xy - sum_x * sum_y) / denominator;
+                const c = (sum_y - m * sum_x) / n;
+
+                model = { m, c };
+
+                const lineData = [
+                    { x: CHART_X_MIN, y: m * CHART_X_MIN + c },
+                    { x: CHART_X_MAX, y: m * CHART_X_MAX + c }
+                ];
+
+                updateChart([
+                    { ...styles.initial, data: allData },
+                    { ...styles.sample, data: samplePoints },
+                    { ...styles.modelLine, data: lineData }
+                ]);
+
+                statusText.textContent = `步骤 2: 拟合直线: y = ${m.toFixed(2)}x + ${c.toFixed(2)} (蓝线)`;
+            }
+
+            /**
+             * 步骤 3: 判断内点
+             */
+            function step3_ClassifyPoints() {
+                const threshold = parseFloat(thresholdInput.value);
+                const inliers = [];
+                const outliers = [];
+
+                allData.forEach(point => {
+                    const y_predicted = model.m * point.x + model.c;
+                    const residual = Math.abs(point.y - y_predicted);
+
+                    if (residual < threshold) {
+                        inliers.push(point);
+                    } else {
+                        outliers.push(point);
+                    }
+                });
+
+                const lineData = [
+                    { x: CHART_X_MIN, y: model.m * CHART_X_MIN + model.c },
+                    { x: CHART_X_MAX, y: model.m * CHART_X_MAX + model.c }
+                ];
+
+                // 最终可视化 (对应 Python plt.show())
+                updateChart([
+                    { ...styles.inlier, data: inliers, label: `Inliers (${inliers.length} points)` },
+                    { ...styles.outlier, data: outliers, label: `Outliers (${outliers.length} points)` },
+                    { ...styles.sample, data: samplePoints },
+                    { ...styles.modelLine, data: lineData }
+                ]);
+
+                return { inliers: inliers.length, outliers: outliers.length };
+            }
+
+            /**
+             * 辅助函数：更新或创建图表
+             */
+            function updateChart(datasets) {
+                if (chart) {
+                    chart.destroy();
+                }
+
+                chart = new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: datasets
+                    },
+                    options: {
+                        animation: { duration: 200 }, // 添加一个轻微的过渡动画
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'A Single RANSAC Iteration',
+                                font: { size: 18 }
+                            },
+                            legend: { position: 'top' }
+                        },
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'X (对应 Log(r))' },
+                                min: CHART_X_MIN,
+                                max: CHART_X_MAX
+                            },
+                            y: {
+                                title: { display: true, text: 'Y (对应 Log(T))' }
+                            }
+                        },
+                    }
+                });
+            }
+
+            /**
+             * 辅助函数：重置 RANSAC 状态 (保留数据)
+             */
+            function resetState() {
+                ransacState = 0;
+                samplePoints = [];
+                model = {};
+                stepBtn.textContent = 'Step 1: 随机采样 (Random Sample)';
+                statusText.textContent = `数据已重置。请开始 "Step 1"`;
+            }
+
+            // 初始化生成数据
+            generateData();
+        }
+
+        // 检查 Chart.js 是否已加载，如果已加载则立即初始化，否则等待加载
+        if (typeof Chart !== 'undefined') {
+            initApp();
+        } else {
+            // 如果 Chart.js 尚未加载，等待一段时间后重试
+            setTimeout(() => {
+                if (typeof Chart !== 'undefined') {
+                    initApp();
+                } else {
+                    document.getElementById('statusText').textContent = '图表库加载失败，请刷新页面重试';
+                }
+            }, 100);
+        }
+    </script>
+
+</body>
+
+</html>
