@@ -56,6 +56,26 @@ AI4S 青少年人工智能驱动科学挑战营 · 官方开源课程资源库
 
 [🧩 逻辑梳理互动](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/logic-interactive.html)
 
+**任务二：神秘空间的引力规律**
+
+[开普勒第三定律可视化](https://kashadong.github.io/ai4s-teen-camp-2026/task2-orbit/Kepler3-Vis.html)
+
+[RANSAC算法体验](https://kashadong.github.io/ai4s-teen-camp-2026/task2-orbit/RANSAC.html)
+
+[PhET 最小二乘回归模拟器](https://phet.colorado.edu/sims/html/least-squares-regression/latest/least-squares-regression_all.html)
+
+**任务五：递推数列的隐藏规律**
+
+[递推数列参数求解器](https://kashadong.github.io/ai4s-teen-camp-2026/task5-sequences/recurrence-parameter-solver.html)
+
+[机器学习范式](https://kashadong.github.io/ai4s-teen-camp-2026/task5-sequences/ML.html)
+
+[神经网络示意](https://kashadong.github.io/ai4s-teen-camp-2026/task5-sequences/NN.html)
+
+**任务六：从生命科学到人工智能**
+
+[手写数字识别](https://kashadong.github.io/ai4s-teen-camp-2026/task6-biotoAI/digit-recognition/3D-Visualization-of-a-Convolutional-Neural-Network.html)
+
   
 ## 🧠 支持平台 / Technical Support  
   

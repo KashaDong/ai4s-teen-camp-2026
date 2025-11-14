@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机器学习核心范式：学做菜的智慧</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.bootcdn.net/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            line-height: 1.4; color: #2c3e50; max-width: 1000px; margin: 15px auto; padding: 0 15px; 
+            background-color: #f8f9fa;
+        }
+        h1, h2 { color: #2c3e50; border-bottom: 1px solid #3498db; padding-bottom: 6px; margin: 10px 0; }
+        .container { background: #ffffff; padding: 15px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 12px; }
+        
+        /* 紧凑的核心要素样式 */
+        .core-paradigm { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 15px; border-radius: 6px; margin: 10px 0;
+            text-align: center;
+        }
+        .paradigm-title { 
+            font-size: 1.3em; margin-bottom: 5px;
+        }
+        
+        /* 紧凑的网格布局 */
+        .paradigm-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr;
+            gap: 12px; 
+            margin-top: 12px;
+        }
+        .theory-card, .practice-card { 
+            padding: 12px; border-radius: 6px; 
+            background: white; border: 1px solid #e9ecef;
+        }
+        .theory-card { border-left: 3px solid #3498db; }
+        .practice-card { border-left: 3px solid #27ae60; }
+        
+        /* 紧凑的滑块和按钮 */
+        .sliders { margin: 10px 0; }
+        .slider-group { margin: 8px 0; }
+        .slider-group label { 
+            display: flex; align-items: center; margin-bottom: 4px; font-weight: bold; 
+            color: #2c3e50; font-size: 0.85em;
+        }
+        .slider-icon {
+            font-size: 1.2em; margin-right: 6px;
+        }
+        .slider-group input[type="range"] {
+            width: 100%; height: 4px; border-radius: 2px;
+            background: #dfe6e9; outline: none;
+        }
+        
+        .taste-result {
+            font-size: 0.95em; font-weight: bold; padding: 8px;
+            border-radius: 4px; margin: 6px 0; text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        /* 评分和重置按钮放在滑块下方 */
+        .control-row {
+            display: flex; 
+            align-items: center;
+            justify-content: space-between;
+            background: #f8f9fa; padding: 8px 12px; border-radius: 4px; 
+            margin: 8px 0; border: 1px solid #e9ecef;
+            font-size: 0.9em;
+        }
+        .score-display {
+            display: flex; align-items: center;
+        }
+        .status-icon { 
+            font-size: 1.2em; margin-right: 6px;
+        }
+        .status-value { 
+            font-size: 1em; font-weight: bold; color: #3498db;
+            font-family: 'Courier New', monospace;
+            margin-left: 4px;
+        }
+        
+        /* 优化对比样式改进 */
+        .optimization-comparison { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
+            margin: 10px 0;
+        }
+        .method { 
+            padding: 10px; border-radius: 4px; text-align: center;
+            background: white; border: 1px solid #e9ecef;
+            font-size: 0.85em;
+        }
+        .random-method { 
+            border-top: 2px solid #e74c3c; 
+            background: linear-gradient(135deg, #fff 0%, #fef0ef 100%);
+        }
+        .smart-method { 
+            border-top: 2px solid #27ae60; 
+            background: linear-gradient(135deg, #fff 0%, #f0f9f0 100%);
+        }
+        
+        .progress-tracker { 
+            margin: 6px 0; max-height: 120px; overflow-y: auto;
+            background: #f8f9fa; padding: 6px; border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .progress-step {
+            padding: 4px; margin: 2px 0; border-radius: 2px;
+            background: #e9ecef; font-size: 0.8em;
+            font-family: 'Courier New', monospace;
+        }
+        .progress-step.active { background: #3498db; color: white; }
+        .progress-step.improved { background: #27ae60; color: white; }
+        .progress-step.worse { background: #e74c3c; color: white; }
+        
+        .method-stats {
+            margin: 6px 0; padding: 4px;
+            background: #f8f9fa; border-radius: 3px;
+            font-size: 0.8em;
+        }
+        
+        button { 
+            background-color: #3498db; color: white; border: none; 
+            padding: 6px 12px; border-radius: 3px; cursor: pointer; 
+            font-size: 0.85em; margin: 2px; font-weight: 500;
+        }
+        button:hover { background-color: #2980b9; }
+        
+        .status-display { 
+            margin: 6px 0; padding: 6px; border-radius: 3px; 
+            background: #f8f9fa; font-size: 0.85em;
+            text-align: center; font-family: 'Courier New', monospace;
+        }
+        
+        .math-formula {
+            background: #f8f9fa; padding: 8px; border-radius: 3px;
+            text-align: center; margin: 6px 0; border: 1px solid #e9ecef;
+            font-size: 0.9em;
+        }
+
+        .optimizing .control-row {
+            background: #fff3cd; border-color: #ffeaa7;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { background: #fff3cd; }
+            50% { background: #ffeaa7; }
+            100% { background: #fff3cd; }
+        }
+
+        .summary-box {
+            background: #e8f4f8; padding: 15px; border-radius: 6px;
+            margin: 10px 0; border-left: 4px solid #3498db;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+
+        .algorithm-explanation {
+            font-size: 0.85em; color: #666;
+            margin: 5px 0; line-height: 1.3;
+        }
+
+        .cooking-analogy {
+            background: #fff8e1; padding: 10px; border-radius: 4px;
+            margin: 8px 0; border-left: 3px solid #ffa000;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+        .analogy-item {
+            margin: 6px 0;
+            padding-left: 8px;
+            border-left: 2px solid #ffa000;
+        }
+
+        /* 压缩第二模块样式 */
+        .compact-section {
+            margin: 5px 0;
+        }
+        .compact-button {
+            margin-top: 8px;
+        }
+
+        /* 结果提示语样式 */
+        .result-message {
+            margin: 4px 0;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .random-result {
+            background: #fdedec;
+            border-left: 3px solid #e74c3c;
+        }
+        .smart-result {
+            background: #d5f4e6;
+            border-left: 3px solid #27ae60;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>机器学习核心范式：从学做菜理解AI思维</h1>
+    
+    <div class="core-paradigm">
+        <div class="paradigm-title">机器学习三大核心要素</div>
+        <div style="font-size: 0.9em; opacity: 0.9;">决策函数 · 损失函数 · 优化算法</div>
+    </div>
+
+    <div class="container">
+        <h2>1. 决策函数：机器的"调味公式"</h2>
+        
+        <div class="paradigm-grid">
+            <div class="theory-card">
+                <h4>🎯 核心概念</h4>
+                <p><strong>决策函数</strong>是机器学习模型进行预测的数学规则。</p>
+                <div class="math-formula">
+                    \(\hat{Z} = p \cdot Y - q \cdot X\)
+                </div>
+                <p>在烹饪中，这相当于：</p>
+                <div class="math-formula">
+                    预测味道 = p × 蔬菜量 - q × 肥肉量
+                </div>
+                <p>其中：</p>
+                <ul style="font-size: 0.9em; margin: 8px 0; padding-left: 20px;">
+                    <li>p = 盐用量（提升蔬菜风味）</li>
+                    <li>q = 醋用量（解肥肉油腻）</li>
+                    <li>Y = 蔬菜量，X = 肥肉量</li>
+                </ul>
+            </div>
+            
+            <div class="practice-card">
+                <h4>🔧 调整调味</h4>
+
+                <div class="taste-result" id="tastePrediction">
+                    味道中性 😐
+                </div>
+                
+                <div class="sliders">
+                    <div class="slider-group">
+                        <label>
+                            <span class="slider-icon">🧂</span>
+                            盐用量 p: <span id="pValue">1.00</span>
+                        </label>
+                        <input type="range" id="pSlider" min="0.5" max="2.5" step="0.01" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <label>
+                            <span class="slider-icon">🍋</span>
+                            醋用量 q: <span id="qValue">1.00</span>
+                        </label>
+                        <input type="range" id="qSlider" min="0.5" max="2.5" step="0.01" value="1.0">
+                    </div>
+                </div>
+
+                <!-- 评分和重置按钮移到滑块下方 -->
+                <div class="control-row" id="recipeStatus">
+                    <div class="score-display">
+                        <span class="status-icon">📊</span>
+                        <span>当前配方评分：</span>
+                        <span class="status-value" id="currentScore">-</span>
+                    </div>
+                    <button id="resetRecipe">重置配方</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>2. 损失函数：机器的"品尝评分"</h2>
+        
+        <div class="paradigm-grid">
+            <div class="theory-card">
+                <h4>🎯 核心概念</h4>
+                <p><strong>损失函数</strong>衡量模型预测的准确程度。</p>
+                <div class="math-formula">
+                    \(Loss = \frac{1}{N}\sum (Z_{真实} - \hat{Z}_{预测})^2\)
+                </div>
+                <p>在烹饪中：</p>
+                <div class="math-formula">
+                    损失 = 平均[(标准味道 - 预测味道)²]
+                </div>
+                <p><strong>目标：最小化损失</strong></p>
+            </div>
+            
+            <div class="practice-card">
+                <h4>🔧 评估效果</h4>
+                
+                <div style="text-align: center;" class="compact-section">
+                    <div class="compact-section">与完美配方的差距：</div>
+                    <div class="status-value" style="font-size: 1.2em; margin: 4px 0;" id="errorDisplay">0.000</div>
+                    <div class="status-display compact-section" id="errorStatus">
+                        点击评估当前配方
+                    </div>
+                    <button id="calculateError" class="compact-button">评估配方</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>3. 优化算法：机器的"智能学习"</h2>
+        
+        <div class="paradigm-grid">
+            <div class="theory-card">
+                <h4>🎯 核心概念</h4>
+                <p><strong>优化算法</strong>智能调整参数以最小化损失。</p>
+                <p><strong>Adam算法</strong>特点：</p>
+                <div class="algorithm-explanation">
+                    • <strong>自适应步长</strong>：根据误差大小调整学习速度<br>
+                    • <strong>动量效应</strong>：保持之前的调整方向<br>
+                    • <strong>记忆学习</strong>：记住历史经验，避免重复错误
+                </div>
+                
+                <div class="cooking-analogy">
+                    <strong>👨‍🍳 烹饪类比：Adam算法就像顶级厨师的调味智慧</strong><br>
+                    <div class="analogy-item">
+                        • <strong>自适应步长</strong> → 厨师根据"咸淡程度"决定加盐量：差得多就多加点，差不多就微调
+                    </div>
+                    <div class="analogy-item">
+                        • <strong>动量效应</strong> → 厨师保持之前的调整方向：上次加盐有效，这次继续类似方向
+                    </div>
+                    <div class="analogy-item">
+                        • <strong>记忆学习</strong> → 厨师记住历史经验：避免重复犯错，越来越精准
+                    </div>
+                </div>
+            </div>
+            
+            <div class="practice-card">
+                <h4>🔧 学习方法对比</h4>
+                
+                <div class="optimization-comparison">
+                    <div class="method random-method">
+                        <h5>🧪 随机尝试法</h5>
+                        <div class="method-stats">
+                            耗时: <span id="randomTime">-</span><br>
+                            尝试次数: <span id="randomAttempts">-</span><br>
+                            最佳评分: <span id="randomBestScore">-</span>
+                        </div>
+                        <div class="progress-tracker" id="randomProgress">
+                            <div class="progress-step">等待开始...</div>
+                        </div>
+                        <button id="startRandom">开始尝试</button>
+                    </div>
+                    
+                    <div class="method smart-method">
+                        <h5>🚀 智能学习法</h5>
+                        <div class="method-stats">
+                            耗时: <span id="smartTime">-</span><br>
+                            学习步骤: <span id="smartSteps">-</span><br>
+                            最终评分: <span id="smartFinalScore">-</span>
+                        </div>
+                        <div class="progress-tracker" id="smartProgress">
+                            <div class="progress-step">等待开始...</div>
+                        </div>
+                        <button id="startSmart">开始学习</button>
+                    </div>
+                </div>
+                
+                <div class="status-display" id="optimizationStatus">
+                    选择一种学习方法，观察参数如何变化
+                </div>
+                
+                <!-- 独立的结果提示语区域 -->
+                <div id="resultMessages"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🎯 学习总结</h2>
+        <div class="summary-box">
+            <p><strong>🤖 机器学习三大核心要素：</strong></p>
+            <p>• <strong>决策函数</strong>：定义了机器如何思考 → 就像厨师的"调味公式"（p×蔬菜量 - q×肥肉量）</p>
+            <p>• <strong>损失函数</strong>：评价机器思考的质量 → 就像"品尝评分"，量化与完美味道的差距</p>
+            <p>• <strong>优化算法</strong>：改进机器思考的方法 → 就像"智能调味"，通过Adam算法快速找到最佳配方</p>
+            
+            <div style="margin-top: 12px; padding: 10px; background: #d5f4e6; border-radius: 4px; text-align: center;">
+                <p style="font-weight: bold; font-size: 1.1em; margin: 0;">
+                    🎓 机器学习 = 决策函数 + 损失函数 + 优化算法
+                </p>
+                <p style="font-size: 0.95em; margin: 4px 0 0 0; color: #2c3e50;">
+                    通过这个烹饪类比，你已理解了AI思维的核心原理！
+                </p>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // 配置参数 - 调整理想值
+    const PERFECT_P = 1.9;  // 理想盐用量
+    const PERFECT_Q = 0.9;  // 理想醋用量
+
+    // 初始化元素
+    const pSlider = document.getElementById('pSlider');
+    const qSlider = document.getElementById('qSlider');
+    const pValue = document.getElementById('pValue');
+    const qValue = document.getElementById('qValue');
+    const currentScore = document.getElementById('currentScore');
+    const tastePrediction = document.getElementById('tastePrediction');
+    const errorDisplay = document.getElementById('errorDisplay');
+    const errorStatus = document.getElementById('errorStatus');
+    const optimizationStatus = document.getElementById('optimizationStatus');
+    const recipeStatus = document.getElementById('recipeStatus');
+    const resultMessages = document.getElementById('resultMessages');
+
+    // 统计元素
+    const randomTime = document.getElementById('randomTime');
+    const randomAttempts = document.getElementById('randomAttempts');
+    const randomBestScore = document.getElementById('randomBestScore');
+    const smartTime = document.getElementById('smartTime');
+    const smartSteps = document.getElementById('smartSteps');
+    const smartFinalScore = document.getElementById('smartFinalScore');
+
+    let isOptimizing = false;
+
+    // 初始化事件监听
+    pSlider.addEventListener('input', updateAllDisplays);
+    qSlider.addEventListener('input', updateAllDisplays);
+    document.getElementById('resetRecipe').addEventListener('click', resetRecipe);
+    document.getElementById('calculateError').addEventListener('click', calculateError);
+    document.getElementById('startRandom').addEventListener('click', startRandomOptimization);
+    document.getElementById('startSmart').addEventListener('click', startSmartOptimization);
+
+    function updateAllDisplays() {
+        updateParamDisplay();
+        updateTastePrediction();
+    }
+
+    function updateParamDisplay() {
+        const p = parseFloat(pSlider.value);
+        const q = parseFloat(qSlider.value);
+        
+        pValue.textContent = p.toFixed(2);
+        qValue.textContent = q.toFixed(2);
+    }
+
+    function updateTastePrediction() {
+        const p = parseFloat(pSlider.value);
+        const q = parseFloat(qSlider.value);
+        
+        const pDiff = p - PERFECT_P;
+        const qDiff = q - PERFECT_Q;
+        const distance = Math.sqrt(pDiff * pDiff + qDiff * qDiff);
+        
+        let emoji, description, color;
+        
+        if (distance < 0.15) {
+            emoji = '😋';
+            description = '完美配方！咸酸平衡';
+            color = '#27ae60';
+        } else if (distance < 0.4) {
+            if (Math.abs(pDiff) > Math.abs(qDiff)) {
+                if (pDiff > 0) {
+                    emoji = '🧂';
+                    description = '太咸了';
+                    color = '#e74c3c';
+                } else {
+                    emoji = '💧';
+                    description = '不够咸';
+                    color = '#3498db';
+                }
+            } else {
+                if (qDiff > 0) {
+                    emoji = '🍋';
+                    description = '太酸了';
+                    color = '#e67e22';
+                } else {
+                    emoji = '🌵';
+                    description = '不够酸';
+                    color = '#2ecc71';
+                }
+            }
+        } else {
+            if (pDiff > 0.5 && qDiff > 0.5) {
+                emoji = '😖';
+                description = '又咸又酸！';
+                color = '#e74c3c';
+            } else if (pDiff < -0.5 && qDiff < -0.5) {
+                emoji = '😐';
+                description = '太淡了';
+                color = '#95a5a6';
+            } else if (pDiff > 0.5) {
+                emoji = '🧂';
+                description = '咸死了！';
+                color = '#e74c3c';
+            } else if (qDiff > 0.5) {
+                emoji = '🍋';
+                description = '酸死了！';
+                color = '#e67e22';
+            } else if (pDiff < -0.5) {
+                emoji = '💧';
+                description = '没咸味';
+                color = '#3498db';
+            } else if (qDiff < -0.5) {
+                emoji = '🌵';
+                description = '没酸味';
+                color = '#2ecc71';
+            } else {
+                emoji = '😐';
+                description = '味道奇怪';
+                color = '#95a5a6';
+            }
+        }
+        
+        tastePrediction.textContent = `${description} ${emoji}`;
+        tastePrediction.style.background = color;
+        tastePrediction.style.color = 'white';
+        
+        // 评分计算：最高99分
+        const score = Math.min(99, Math.max(0, 100 - distance * 80));
+        currentScore.textContent = score.toFixed(0);
+        currentScore.style.color = distance < 0.15 ? '#27ae60' : 
+                                 distance < 0.4 ? '#f39c12' : '#e74c3c';
+    }
+
+    function calculateError() {
+        const p = parseFloat(pSlider.value);
+        const q = parseFloat(qSlider.value);
+        
+        const pDiff = p - PERFECT_P;
+        const qDiff = q - PERFECT_Q;
+        const distance = Math.sqrt(pDiff * pDiff + qDiff * qDiff);
+        const score = Math.min(99, Math.max(0, 100 - distance * 80));
+        
+        errorDisplay.textContent = distance.toFixed(3);
+        errorDisplay.style.color = distance < 0.15 ? '#27ae60' : 
+                                 distance < 0.4 ? '#f39c12' : '#e74c3c';
+        
+        errorStatus.textContent = `评分：${score.toFixed(0)}分 (差距：${distance.toFixed(3)})`;
+        errorStatus.style.background = distance < 0.15 ? '#d5f4e6' : 
+                                     distance < 0.4 ? '#fef9e7' : '#fdedec';
+    }
+
+    function resetRecipe() {
+        pSlider.value = 1.0;
+        qSlider.value = 1.0;
+        updateAllDisplays();
+        errorStatus.textContent = '配方已重置';
+        errorStatus.style.background = '#f8f9fa';
+    }
+
+    function startOptimization() {
+        isOptimizing = true;
+        recipeStatus.classList.add('optimizing');
+        document.getElementById('startRandom').disabled = true;
+        document.getElementById('startSmart').disabled = true;
+    }
+
+    function endOptimization() {
+        isOptimizing = false;
+        recipeStatus.classList.remove('optimizing');
+        document.getElementById('startRandom').disabled = false;
+        document.getElementById('startSmart').disabled = false;
+    }
+
+    // 更好的随机数生成器
+    function betterRandom() {
+        const array = new Uint32Array(1);
+        window.crypto.getRandomValues(array);
+        return array[0] / 4294967295; // 转换为0-1之间的浮点数
+    }
+
+    async function startRandomOptimization() {
+        startOptimization();
+        const progress = document.getElementById('randomProgress');
+        progress.innerHTML = '<div class="progress-step">开始随机尝试...</div>';
+        optimizationStatus.textContent = '随机尝试中...观察盐和醋用量的变化';
+        
+        let bestScore = 0;
+        let bestP = 1.0, bestQ = 1.0;
+        let attempts = 0;
+        const startTime = Date.now();
+        
+        for (let i = 1; i <= 10; i++) {
+            attempts++;
+            // 使用真正的随机数
+            const newP = (0.5 + betterRandom() * 2.0).toFixed(2);
+            const newQ = (0.5 + betterRandom() * 2.0).toFixed(2);
+            
+            pSlider.value = newP;
+            qSlider.value = newQ;
+            updateAllDisplays();
+            
+            const distance = Math.sqrt(Math.pow(newP - PERFECT_P, 2) + Math.pow(newQ - PERFECT_Q, 2));
+            const score = Math.min(99, Math.max(0, 100 - distance * 80));
+            
+            let stepClass = '';
+            if (score > bestScore) {
+                bestScore = score;
+                bestP = newP;
+                bestQ = newQ;
+                stepClass = 'improved';
+            } else if (score < 30) {
+                stepClass = 'worse';
+            }
+            
+            progress.innerHTML += `<div class="progress-step ${stepClass}">尝试${i}: 盐=${newP} 醋=${newQ} 评分${score.toFixed(0)}分</div>`;
+            
+            progress.scrollTop = progress.scrollHeight;
+            await new Promise(resolve => setTimeout(resolve, 800));
+        }
+        
+        const endTime = Date.now();
+        const timeUsed = ((endTime - startTime) / 1000).toFixed(1);
+        
+        pSlider.value = bestP;
+        qSlider.value = bestQ;
+        updateAllDisplays();
+        calculateError();
+        
+        randomTime.textContent = `${timeUsed}秒`;
+        randomAttempts.textContent = attempts;
+        randomBestScore.textContent = `${bestScore.toFixed(0)}分`;
+        
+        // 添加随机尝试结果提示语（不覆盖之前的）
+        const randomMessage = document.createElement('div');
+        randomMessage.className = 'result-message random-result';
+        randomMessage.innerHTML = `🧪 <strong>随机尝试完成</strong>：用了${attempts}次尝试，${timeUsed}秒，最佳评分：${bestScore.toFixed(0)}分`;
+        resultMessages.appendChild(randomMessage);
+        
+        endOptimization();
+    }
+
+    async function startSmartOptimization() {
+        startOptimization();
+        const progress = document.getElementById('smartProgress');
+        progress.innerHTML = '<div class="progress-step">开始智能学习...</div>';
+        optimizationStatus.textContent = '智能学习中...观察盐和醋用量如何智能调整';
+        
+        let p = parseFloat(pSlider.value);
+        let q = parseFloat(qSlider.value);
+        const startTime = Date.now();
+        let steps = 0;
+        let finalScore = 0;
+        
+        // 模拟梯度下降
+        for (let i = 1; i <= 6; i++) {
+            steps++;
+            
+            // 计算梯度（方向）
+            const gradP = (PERFECT_P - p) * 0.3;
+            const gradQ = (PERFECT_Q - q) * 0.3;
+            
+            // 更新参数
+            p += gradP;
+            q += gradQ;
+            
+            pSlider.value = p.toFixed(2);
+            qSlider.value = q.toFixed(2);
+            updateAllDisplays();
+            
+            const distance = Math.sqrt(Math.pow(p - PERFECT_P, 2) + Math.pow(q - PERFECT_Q, 2));
+            const score = Math.min(99, Math.max(0, 100 - distance * 80));
+            finalScore = score;
+            
+            progress.innerHTML += `<div class="progress-step ${score > 85 ? 'improved' : 'active'}">步骤${i}: 盐=${p.toFixed(2)} 醋=${q.toFixed(2)} 评分${score.toFixed(0)}分</div>`;
+            progress.scrollTop = progress.scrollHeight;
+            
+            // 添加学习说明
+            if (i === 1) {
+                progress.innerHTML += `<div class="progress-step" style="background: #fff3cd;">👨‍🍳 尝了一口：${p.toFixed(2) > PERFECT_P ? '太咸了，少放点盐' : '不够咸，多放点盐'}</div>`;
+            } else if (i === 3) {
+                progress.innerHTML += `<div class="progress-step" style="background: #fff3cd;">👨‍🍳 记住经验：调整幅度更精准了</div>`;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 1200));
+        }
+        
+        const endTime = Date.now();
+        const timeUsed = ((endTime - startTime) / 1000).toFixed(1);
+        
+        calculateError();
+        
+        smartTime.textContent = `${timeUsed}秒`;
+        smartSteps.textContent = steps;
+        smartFinalScore.textContent = `${finalScore.toFixed(0)}分`;
+        
+        // 添加智能学习结果提示语（不覆盖之前的）
+        const smartMessage = document.createElement('div');
+        smartMessage.className = 'result-message smart-result';
+        smartMessage.innerHTML = `🚀 <strong>智能学习完成</strong>：用了${steps}个步骤，${timeUsed}秒，最终评分：${finalScore.toFixed(0)}分`;
+        resultMessages.appendChild(smartMessage);
+        
+        endOptimization();
+    }
+
+    // 初始化
+    updateAllDisplays();
+</script>
+<footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 14px; line-height: 1.5;">
+    <p style="margin: 5px 0;">© 2025 付佳兴、马衍龙、郑子杰及AI4S TEEN CAMP组委会</p>
+    <p style="margin: 5px 0; font-size: 13px;">本教学材料仅供课堂教学与学术交流使用，未经书面许可，不得用于任何商业用途。</p>
+</footer>
+</body>
+</html>

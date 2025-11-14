@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI for Science - 递推数列参数求解交互式演示</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.bootcdn.net/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            line-height: 1.6; 
+            color: #2c3e50; 
+            max-width: 1200px; 
+            margin: 20px auto; 
+            padding: 0 20px; 
+            background-color: #f8f9fa;
+        }
+        h1, h2 { 
+            color: #2c3e50; 
+            border-bottom: 2px solid #3498db; 
+            padding-bottom: 12px; 
+            margin-top: 0; 
+        }
+        .container { 
+            background: #ffffff; 
+            padding: 25px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08); 
+            margin-bottom: 20px; 
+            border: 1px solid #e9ecef;
+        }
+        .controls { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; margin-top: 15px; }
+        .slider-group { flex: 1; min-width: 180px; }
+        button { 
+            background-color: #3498db; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        button:hover { 
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+        }
+        button:disabled { 
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        /* 按钮悬停效果增强 */
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+        button:hover::after {
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+        }
+        #buttonStatus { 
+            font-weight: bold; 
+            color: #e74c3c; 
+            margin-left: 15px; 
+            font-family: 'Courier New', Courier, monospace; 
+            font-size: 14px; 
+        }
+        #plotDiv { width: 100%; height: 550px; margin-top: 10px; border-radius: 6px; overflow: hidden; border: 1px solid #e9ecef; }
+        .explanation { 
+            background-color: #e8f4f8; 
+            border-left: 4px solid #3498db; 
+            padding: 20px; 
+            margin: 15px 0; 
+            border-radius: 6px; 
+            font-size: 16px;
+        }
+        .viz-container { display: flex; flex-direction: column; align-items: center; font-family: 'Courier New', monospace; margin-top: 15px; min-height: 120px; }
+        .seq-row { display: flex; margin-bottom: 8px; flex-wrap: wrap; }
+        .seq-item { 
+            width: 45px; 
+            height: 35px; 
+            line-height: 35px; 
+            text-align: center; 
+            border: 1px solid #bdc3c7; 
+            margin: 2px; 
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            border-radius: 4px; 
+            font-size: 13px; 
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .highlight-x { 
+            background-color: #f39c12;
+            color: white;
+            transform: scale(1.1); 
+            box-shadow: 0 2px 6px rgba(243, 156, 18, 0.3);
+        }
+        .highlight-y { 
+            background-color: #27ae60;
+            color: white;
+            transform: scale(1.1); 
+            box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+        }
+        .highlight-z { 
+            background-color: #e74c3c;
+            color: white; 
+            transform: scale(1.1); 
+            box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+        }
+        .arrow-container { display: flex; flex-direction: column; align-items: center; margin-top: 8px; font-size: 18px; color: #3498db; font-weight: bold; }
+        #extracted-values { display: flex; gap: 8px; margin-top: 8px; font-weight: bold; font-size: 16px; color: #2c3e50; }
+        .step-controls { display: flex; gap: 8px; margin-top: 12px; }
+        .data-section { margin-bottom: 8px; }
+        .data-container { display: flex; gap: 20px; align-items: flex-start; }
+        .data-text { flex: 1; }
+        .data-preview { flex: 0 0 100%; max-width: 100%; }
+        .horizontal-table-container { 
+            max-height: 120px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-top: 10px;
+            white-space: nowrap;
+            background: #ffffff;
+            width: 100%;
+        }
+        .horizontal-table {
+            display: inline-block;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin: 0;
+        }
+        .horizontal-table th, 
+        .horizontal-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px 10px;
+            text-align: center;
+            min-width: 40px;
+        }
+        .horizontal-table th {
+            background-color: #6c757d;
+            color: white;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+        }
+        .horizontal-table td:first-child,
+        .horizontal-table th:first-child {
+            position: sticky;
+            left: 0;
+            background-color: #6c757d;
+            color: white;
+            z-index: 2;
+        }
+        /* 特征工程模块的左右布局 */
+        .feature-engineering-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            margin-top: 15px;
+        }
+        .sequence-visualization {
+            flex: 7;
+            min-width: 0;
+        }
+        .constructed-points-table {
+            flex: 3;
+            min-width: 200px;
+        }
+        .points-table-container {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background: #ffffff;
+        }
+        .constructed-points-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin: 0;
+        }
+        .constructed-points-table th, 
+        .constructed-points-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: center;
+        }
+        .constructed-points-table th {
+            background-color: #6c757d;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        /* 表格中的颜色类 */
+        .table-x { background-color: #f39c12; color: white; font-weight: 500; }
+        .table-y { background-color: #27ae60; color: white; font-weight: 500; }
+        .table-z { background-color: #e74c3c; color: white; font-weight: 500; }
+        /* 第三模块的新布局 */
+        .exploration-container {
+            display: flex;
+            gap: 20px;
+            /* margin-top: 15px; */
+            position: relative;
+        }
+        .exploration-controls {
+            margin-top: 14px;
+            flex: 1;
+            min-width: 300px;
+            padding-right: 20px;
+            position: relative;
+        }
+        .exploration-controls::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background-color: #dee2e6;
+        }
+        .loss-info-container {
+          display: flex;
+          flex-direction: column;
+          padding-top: 4px;
+        }
+        .exploration-plot {
+            flex: 2;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .controls-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .slider-group {
+            margin-bottom: 5px;
+        }
+        .slider-group label {
+            font-size: 14px; 
+            display: block; 
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        .slider-group input[type="range"] {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: #bdc3c7;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+        }
+        .slider-group input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 6px rgba(52, 152, 219, 0.4);
+        }
+        .train-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #dee2e6;
+        }
+        .loss-section {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        /* 数据预览提示 */
+        .data-preview-info {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+            text-align: center;
+            font-style: italic;
+        }
+        /* 视角控制按钮 */
+        .view-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: flex-end;
+        }
+        .view-controls button {
+            background-color: #6c757d;
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+        .view-controls button:hover {
+            background-color: #5a6268;
+        }
+        .view-controls button.active {
+            background-color: #3498db;
+        }
+        /* 训练控制按钮组 */
+        .train-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .train-controls button {
+            flex: 1;
+            min-width: 120px;
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+        .single-step-btn {
+            background-color: #27ae60;
+        }
+        .single-step-btn:hover {
+            background-color: #219a52;
+        }
+        .hundred-steps-btn {
+            background-color: #9b59b6;
+        }
+        .hundred-steps-btn:hover {
+            background-color: #8e44ad;
+        }
+        .reset-train-btn {
+            background-color: #e74c3c;
+        }
+        .reset-train-btn:hover {
+            background-color: #c0392b;
+        }
+        .reset-steps-btn {
+            background-color: #e74c3c;
+        }
+        .reset-steps-btn:hover {
+            background-color: #c0392b;
+        }
+        .construct-all-btn {
+            background-color: #9b59b6;
+        }
+        .construct-all-btn:hover {
+            background-color: #8e44ad;
+        }
+        .loss-info {
+            font-family: 'Courier New', monospace;
+            background-color: #ffffff;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            margin-top: 6px;
+            font-size: 13px;
+        }
+        .loss-info div {
+            margin-bottom: 5px;
+            padding: 4px 0;
+            border-bottom: 1px solid #f1f2f6;
+        }
+        .loss-info div:last-child {
+            border-bottom: none;
+        }
+        /* 损失函数曲线图 */
+        .loss-plot-container {
+            margin-top: 15px;
+            /* height: 321px; */
+            flex: 1;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            background: #ffffff;
+        }
+        .compact-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        /* 链接样式 */
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>AI for Science: 递推数列参数求解器</h1>
+
+    <div class="container">
+        <h2>1. 数据读取与可视化</h2>
+        <div class="data-container">
+            <div class="data-text">
+                <p style="margin: 5px 0; font-size: 16px;">请上传包含 'a_seq' 列的 CSV 文件。网页将自动读取数据并在此处显示预览。</p>
+                <p style="margin: 5px 0; font-size: 16px;">您可以下载 <a href="data:text/csv;charset=utf-8,n,a_seq%0A1,0%0A2,1%0A3,2%0A4,3%0A5,4%0A6,6%0A7,8%0A8,11%0A9,14%0A10,18%0A11,23%0A12,30%0A13,38%0A14,49%0A15,63%0A16,81%0A17,104%0A18,134%0A19,172%0A20,221%0A21,284%0A22,365" download="a_seq_train.csv">示例CSV文件</a> 进行尝试。</p>
+                <input type="file" id="csvFile" accept=".csv" style="margin: 8px 0; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px; width: 100%;">
+            </div>
+        </div>
+        <div class="data-preview">
+            <div class="horizontal-table-container" id="rawDataContainer">
+                <!-- 表格内容将通过JavaScript动态生成 -->
+            </div>
+            <div class="data-preview-info">提示：表格可左右滚动查看完整数据</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>2. 特征工程：构建回归问题</h2>
+        <div class="explanation">
+            <p style="margin: 5px 0;"><strong>核心思想</strong>：我们将原始的递推数列问题 $a_{n+3} \approx p \cdot a_{n+1} - q \cdot a_{n}$ 转化为一个线性回归问题。</p>
+            <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>将 $a_{n}$ 视为第一个<strong>自变量 (X)</strong>。</li>
+                <li>将 $a_{n+1}$ 视为第二个<strong>自变量 (Y)</strong>。</li>
+                <li>将 $a_{n+3}$ 视为<strong>因变量 (Z)</strong>。</li> <!-- 修改：删掉"我们的" -->
+            </ul>
+            <p style="margin: 5px 0;">点击下方按钮，逐步构造三维空间中的点。每次点击将生成一个新的 $(X, Y, Z)$ 数据点。</p>
+        </div>
+        <div class="step-controls">
+            <button id="nextStepButton" disabled>构造一个数据点</button> <!-- 修改：按钮名称 -->
+            <button id="constructAllButton" class="construct-all-btn" disabled>构造所有数据点</button> <!-- 修改：按钮名称 -->
+            <button id="resetStepsButton" class="reset-steps-btn" disabled>重置所有数据点</button> <!-- 修改：按钮名称 -->
+        </div>
+        
+        <!-- 特征工程左右布局 -->
+        <div class="feature-engineering-container">
+            <div class="sequence-visualization" id="feature-animation-container">
+                <!-- 序列可视化内容将通过JavaScript动态生成 -->
+            </div>
+            <div class="constructed-points-table">
+                <div class="points-table-container" id="constructedPointsContainer">
+                    <!-- 构造的数据点表格将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>3. 交互式三维空间探索</h2>
+        <div class="exploration-container">
+            <div class="exploration-controls">
+                <p style="margin: 5px 0; font-size: 16px;">经过特征工程，我们将每一组 $(a_n, a_{n+1}, a_{n+3})$ 数据看作是三维空间中的一个点。我们的目标就是找到一个平面 $z = p \cdot y - q \cdot x$ 来最好地拟合这些数据点。</p>
+                
+                <div class="compact-controls">
+                    <div class="slider-group">
+                        <label for="pSlider">手动调节 p: <span id="pValue">1.00</span></label>
+                        <input type="range" id="pSlider" min="-5" max="5" value="1" step="0.0001">
+                    </div>
+                    <div class="slider-group">
+                        <label for="qSlider">手动调节 q: <span id="qValue">1.00</span></label>
+                        <input type="range" id="qSlider" min="-5" max="5" value="1" step="0.0001">
+                    </div>
+                    
+                    <div class="train-section">
+                        <div class="train-controls">
+                            <button id="trainButton" disabled>开始机器学习训练</button>
+                            <button id="resetTrainButton" class="reset-train-btn" disabled>重置训练</button>
+                            <button id="singleStepButton" class="single-step-btn" disabled>单步训练</button>
+                            <button id="hundredStepsButton" class="hundred-steps-btn" disabled>训练100步</button>
+                        </div>
+                    </div>
+                    <span id="buttonStatus">请先上传CSV文件</span>
+                </div>
+            </div>
+            <!-- 损失函数曲线图 -->
+            <div class="loss-info-container">
+                <!-- 压缩后的实时损失函数显示 -->
+                <div class="loss-info">
+                    <div><strong>当前损失函数:</strong> <span id="currentLossDisplay" style="color: #e74c3c; font-weight: bold;">-</span></div>
+                    <div><strong>当前参数:</strong> <span id="currentParams">p = 1.0000, q = 1.0000</span></div>
+                    <div><strong>训练状态:</strong> <span id="trainingStatus">等待训练</span></div>
+                    <div><strong>收敛速率:</strong> <span id="convergenceRate">-</span></div>
+                </div>
+                <div class="loss-plot-container">
+                <div id="lossPlotDiv" style="width: 100%; height: 100%;"></div>
+            </div>
+            </div>
+            <div class="exploration-plot">
+                <div id="plotDiv"></div>
+                <div class="view-controls">
+                    <button id="lockViewButton">固定视角</button>
+                    <button id="resetViewButton">重置视角</button>
+                    <button id="autoScaleButton">自动缩放</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // 全局变量
+    let rawData = [], engineeredData = { x: [], y: [], z: [] };
+    let currentStep = 0;
+    let constructedPoints = [];
+    let isViewLocked = false;
+    let currentLayout = null;
+    
+    // 训练相关变量
+    let isTraining = false;
+    let currentEpoch = 0;
+    let p = 1.0, q = 1.0;
+    let m_p = 0, v_p = 0, m_q = 0, v_q = 0;
+    let trainingData = null;
+    let lossHistory = [];
+    let previousLoss = null;
+    
+    // DOM 元素
+    const fileInput = document.getElementById('csvFile'), trainButton = document.getElementById('trainButton');
+    const nextStepButton = document.getElementById('nextStepButton'), resetStepsButton = document.getElementById('resetStepsButton');
+    const constructAllButton = document.getElementById('constructAllButton');
+    const pSlider = document.getElementById('pSlider'), qSlider = document.getElementById('qSlider');
+    const pValueSpan = document.getElementById('pValue'), qValueSpan = document.getElementById('qValue');
+    const buttonStatus = document.getElementById('buttonStatus');
+    const lockViewButton = document.getElementById('lockViewButton'), resetViewButton = document.getElementById('resetViewButton');
+    const autoScaleButton = document.getElementById('autoScaleButton');
+    const singleStepButton = document.getElementById('singleStepButton'), resetTrainButton = document.getElementById('resetTrainButton');
+    const hundredStepsButton = document.getElementById('hundredStepsButton');
+    const currentLossDisplay = document.getElementById('currentLossDisplay');
+    const currentParams = document.getElementById('currentParams');
+    const trainingStatus = document.getElementById('trainingStatus');
+    const convergenceRate = document.getElementById('convergenceRate');
+
+    // 格式化坐标轴数字显示
+    function formatAxisNumber(value) {
+        if (Math.abs(value) >= 1000) {
+            return (value / 1000).toFixed(0) + 'k';
+        }
+        return value.toFixed(0);
+    }
+
+    // 事件监听
+    fileInput.addEventListener('change', handleFileSelect);
+    pSlider.addEventListener('input', updateManualPlane);
+    qSlider.addEventListener('input', updateManualPlane);
+    trainButton.addEventListener('click', trainAndAnimate);
+    singleStepButton.addEventListener('click', singleStepTraining);
+    hundredStepsButton.addEventListener('click', hundredStepsTraining);
+    resetTrainButton.addEventListener('click', resetTraining);
+    nextStepButton.addEventListener('click', nextStep);
+    constructAllButton.addEventListener('click', constructAllPoints);
+    resetStepsButton.addEventListener('click', resetSteps);
+    lockViewButton.addEventListener('click', toggleViewLock);
+    resetViewButton.addEventListener('click', resetView);
+    autoScaleButton.addEventListener('click', autoScale);
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0]; if (!file) return;
+        Papa.parse(file, {
+            header: true, dynamicTyping: true,
+            complete: function(results) {
+                rawData = results.data.map(row => row.a_seq).filter(val => val !== null && val !== undefined);
+                if (rawData.length < 4) { alert("CSV文件需要至少4行'a_seq'数据。"); return; }
+                processData();
+                trainButton.disabled = false;
+                singleStepButton.disabled = false;
+                hundredStepsButton.disabled = false;
+                resetTrainButton.disabled = false;
+                nextStepButton.disabled = false;
+                constructAllButton.disabled = false;
+                resetStepsButton.disabled = false;
+                buttonStatus.textContent = '准备就绪';
+                initializeStepAnimation();
+            }
+        });
+    }
+
+    function processData() {
+        displayRawData(rawData);
+        engineeredData = engineerFeatures(rawData);
+        createInitialPlot(engineeredData);
+        createLossPlot();
+        updateManualPlane();
+        
+        // 初始化训练数据
+        initializeTrainingData();
+    }
+    
+    function displayRawData(data) {
+        const container = document.getElementById('rawDataContainer');
+        
+        let table = '<table class="horizontal-table"><tr>';
+        
+        table += '<th>n</th>';
+        data.forEach((val, i) => { 
+            table += `<th>${i}</th>`;
+        });
+        table += '</tr><tr>';
+        
+        table += '<th>$a_n$</th>';
+        data.forEach((val, i) => { 
+            table += `<td>${val}</td>`;
+        });
+        table += '</tr></table>';
+        
+        container.innerHTML = table;
+        
+        setTimeout(() => {
+            container.scrollLeft = 0;
+        }, 100);
+        
+        MathJax.typesetPromise();
+    }
+
+    function engineerFeatures(a_seq) {
+        return { x: a_seq.slice(0, a_seq.length - 3), y: a_seq.slice(1, a_seq.length - 2), z: a_seq.slice(3, a_seq.length), original_seq: a_seq };
+    }
+
+    function initializeTrainingData() {
+        const { original_seq, x, y, z } = engineeredData;
+        const mean = original_seq.reduce((a, b) => a + b) / original_seq.length;
+        const std = Math.sqrt(original_seq.map(v => Math.pow(v - mean, 2)).reduce((a, b) => a + b) / original_seq.length) || 1;
+        const normalize = (val) => (val - mean) / std;
+        
+        trainingData = {
+            X_norm_x: x.map(normalize),
+            X_norm_y: y.map(normalize),
+            z_norm: z.map(normalize),
+            mean: mean,
+            std: std
+        };
+        
+        resetTrainingState();
+    }
+
+    function resetTrainingState() {
+        p = 1.0;
+        q = 1.0;
+        m_p = 0;
+        v_p = 0;
+        m_q = 0;
+        v_q = 0;
+        currentEpoch = 0;
+        isTraining = false;
+        lossHistory = [];
+        previousLoss = null;
+        
+        pSlider.value = p;
+        qSlider.value = q;
+        updateParameterDisplays(p, q);
+        
+        updateLossDisplay(calculateCurrentLoss());
+        trainingStatus.textContent = '等待训练';
+        convergenceRate.textContent = '-';
+        
+        updatePlaneOnPlot(p, q);
+        updatePredictedPoints();
+        
+        trainButton.disabled = false;
+        singleStepButton.disabled = false;
+        hundredStepsButton.disabled = false;
+        resetTrainButton.disabled = false;
+        buttonStatus.textContent = '训练已重置';
+        
+        updateLossPlot();
+    }
+
+    function calculateConvergenceRate(currentLoss) {
+        if (previousLoss === null || previousLoss === 0) {
+            previousLoss = currentLoss;
+            return 0;
+        }
+        
+        const rate = (previousLoss - currentLoss) / previousLoss;
+        previousLoss = currentLoss;
+        
+        return Math.max(0, rate);
+    }
+
+    function updateParameterDisplays(p_val, q_val) {
+        const precision = 6;
+        pValueSpan.textContent = p_val.toFixed(precision);
+        qValueSpan.textContent = q_val.toFixed(precision);
+        currentParams.textContent = `p = ${p_val.toFixed(precision)}, q = ${q_val.toFixed(precision)}`;
+    }
+
+    function calculateLossForParams(p_val, q_val) {
+        if (!trainingData || constructedPoints.length === 0) return 0;
+        
+        const { X_norm_x, X_norm_y, z_norm } = trainingData;
+        let total_loss = 0;
+        
+        for (let i = 0; i < X_norm_x.length; i++) {
+            const y_pred = p_val * X_norm_y[i] - q_val * X_norm_x[i];
+            const error = y_pred - z_norm[i];
+            total_loss += error * error;
+        }
+        
+        return total_loss / X_norm_x.length;
+    }
+
+    function calculateCurrentLoss() {
+        return calculateLossForParams(p, q);
+    }
+
+    function updateLossDisplay(loss) {
+        currentLossDisplay.textContent = loss.toFixed(8);
+        currentLossDisplay.style.color = loss < 0.001 ? '#27ae60' : '#e74c3c';
+    }
+
+    function updateConvergenceRateDisplay(rate) {
+        if (rate === 0) {
+            convergenceRate.textContent = '-';
+            convergenceRate.style.color = '#6c757d';
+        } else {
+            convergenceRate.textContent = rate.toFixed(6);
+            if (rate > 0.01) {
+                convergenceRate.style.color = '#27ae60';
+            } else if (rate > 0.001) {
+                convergenceRate.style.color = '#f39c12';
+            } else {
+                convergenceRate.style.color = '#e74c3c';
+            }
+        }
+    }
+
+    function createLossPlot() {
+        const layout = {
+            title: {
+                text: '损失函数下降曲线',
+                font: { size: 14, color: '#2c3e50' }
+            },
+            xaxis: {
+                title: { text: '训练步数', font: { color: '#2c3e50' } },
+                gridcolor: '#f0f0f0',
+                linecolor: '#2c3e50'
+            },
+            yaxis: {
+                type: 'log',
+                gridcolor: '#f0f0f0',
+                linecolor: '#2c3e50'
+            },
+            margin: { l: 40, r: 20, b: 50, t: 50 },
+            height: 230,
+            showlegend: false,
+            plot_bgcolor: 'rgba(255,255,255,0.9)',
+            paper_bgcolor: 'rgba(255,255,255,0)'
+        };
+        
+        const data = [{
+            x: [],
+            y: [],
+            type: 'scatter',
+            mode: 'lines',
+            line: {
+                color: '#e74c3c',
+                width: 2
+            },
+            name: '损失值'
+        }];
+        
+        Plotly.newPlot('lossPlotDiv', data, layout);
+    }
+
+    function updateLossPlot() {
+        if (lossHistory.length === 0) {
+            Plotly.restyle('lossPlotDiv', {
+                x: [[]],
+                y: [[]]
+            }, [0]);
+            return;
+        }
+        
+        const epochs = lossHistory.map((_, index) => index);
+        const losses = lossHistory.map(item => item.loss);
+        
+        Plotly.restyle('lossPlotDiv', {
+            x: [epochs],
+            y: [losses]
+        }, [0]);
+    }
+
+    function initializeStepAnimation() {
+        currentStep = 0;
+        constructedPoints = [];
+        const container = document.getElementById('feature-animation-container');
+        const data = rawData;
+        const n_display = Math.min(data.length, 12);
+        
+        let html = '<div class="viz-container"><div id="animation-seq-row" class="seq-row">';
+        for(let i = 0; i < n_display; i++) {
+            html += `<div class="seq-item">a<sub>${i}</sub>=${data[i]}</div>`;
+        }
+        html += `</div><div class="arrow-container">↓</div>
+                 <div id="extracted-values">
+                     <span>X($a_n$):&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                     <span>Y($a_{n+1}$):&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                     <span>Z($a_{n+3}$):&nbsp;-</span>
+                 </div></div>`;
+        container.innerHTML = html;
+        
+        updateConstructedPointsDisplay();
+        
+        MathJax.typesetPromise();
+        updateStepHighlights(false);
+    }
+
+    function nextStep() {
+        if (currentStep < engineeredData.x.length) {
+            const newPoint = {
+                x: engineeredData.x[currentStep],
+                y: engineeredData.y[currentStep], 
+                z: engineeredData.z[currentStep],
+                step: currentStep + 1
+            };
+            constructedPoints.push(newPoint);
+            
+            updatePlotWithConstructedPoints(true);
+            updateStepHighlights(true);
+            updateConstructedPointsDisplay();
+            
+            currentStep++;
+            
+            if (currentStep >= engineeredData.x.length) {
+                nextStepButton.disabled = true;
+            }
+        }
+    }
+
+    function constructAllPoints() {
+        if (constructedPoints.length >= engineeredData.x.length) return;
+        
+        nextStepButton.disabled = true;
+        constructAllButton.disabled = true;
+        
+        constructedPoints = [];
+        currentStep = 0;
+        
+        for (let i = 0; i < engineeredData.x.length; i++) {
+            const newPoint = {
+                x: engineeredData.x[i],
+                y: engineeredData.y[i], 
+                z: engineeredData.z[i],
+                step: i + 1
+            };
+            constructedPoints.push(newPoint);
+        }
+        
+        currentStep = engineeredData.x.length;
+        
+        updatePlotWithConstructedPoints(true);
+        updateStepHighlights(true);
+        updateConstructedPointsDisplay();
+        
+        const xValueEl = document.querySelector('#extracted-values span:nth-child(1)');
+        const yValueEl = document.querySelector('#extracted-values span:nth-child(2)');
+        const zValueEl = document.querySelector('#extracted-values span:nth-child(3)');
+        
+        xValueEl.innerHTML = 'X($a_n$):&nbsp;已完成&nbsp;&nbsp;&nbsp;&nbsp;';
+        yValueEl.innerHTML = 'Y($a_{n+1}$):&nbsp;已完成&nbsp;&nbsp;&nbsp;&nbsp;';
+        zValueEl.innerHTML = 'Z($a_{n+3}$):&nbsp;已完成';
+        
+        MathJax.typesetPromise();
+    }
+
+    function resetSteps() {
+        currentStep = 0;
+        constructedPoints = [];
+        nextStepButton.disabled = false;
+        constructAllButton.disabled = false;
+        initializeStepAnimation();
+        updatePlotWithConstructedPoints(true);
+    }
+
+    function updateStepHighlights(showColors = false) {
+        const seqItems = document.querySelectorAll('#animation-seq-row .seq-item');
+        const xValueEl = document.querySelector('#extracted-values span:nth-child(1)');
+        const yValueEl = document.querySelector('#extracted-values span:nth-child(2)');
+        const zValueEl = document.querySelector('#extracted-values span:nth-child(3)');
+        
+        seqItems.forEach(item => item.classList.remove('highlight-x', 'highlight-y', 'highlight-z'));
+        
+        if (currentStep < engineeredData.x.length) {
+            if (showColors) {
+                if (seqItems[currentStep]) seqItems[currentStep].classList.add('highlight-x');
+                if (seqItems[currentStep + 1]) seqItems[currentStep + 1].classList.add('highlight-y');
+                if (seqItems[currentStep + 3]) seqItems[currentStep + 3].classList.add('highlight-z');
+            }
+            
+            xValueEl.innerHTML = `X($a_n$):&nbsp;${engineeredData.x[currentStep]}&nbsp;&nbsp;&nbsp;&nbsp;`;
+            yValueEl.innerHTML = `Y($a_{n+1}$):&nbsp;${engineeredData.y[currentStep]}&nbsp;&nbsp;&nbsp;&nbsp;`;
+            zValueEl.innerHTML = `Z($a_{n+3}$):&nbsp;${engineeredData.z[currentStep]}`;
+        } else {
+            xValueEl.innerHTML = 'X($a_n$):&nbsp;已完成&nbsp;&nbsp;&nbsp;&nbsp;';
+            yValueEl.innerHTML = 'Y($a_{n+1}$):&nbsp;已完成&nbsp;&nbsp;&nbsp;&nbsp;';
+            zValueEl.innerHTML = 'Z($a_{n+3}$):&nbsp;已完成';
+        }
+        MathJax.typesetPromise();
+    }
+
+    function updateConstructedPointsDisplay() {
+        const container = document.getElementById('constructedPointsContainer');
+        if (constructedPoints.length === 0) {
+            container.innerHTML = '<table><tr><th>步骤</th><th>$X (a_n)$</th><th>$Y (a_{n+1})$</th><th>$Z (a_{n+3})$</th></tr></table>';
+            return;
+        }
+        
+        let table = '<table><tr><th>步骤</th><th>$X (a_n)$</th><th>$Y (a_{n+1})$</th><th>$Z (a_{n+3})$</th></tr>';
+        constructedPoints.forEach(point => {
+            table += `<tr>
+                <td>${point.step}</td>
+                <td class="table-x">${point.x}</td>
+                <td class="table-y">${point.y}</td>
+                <td class="table-z">${point.z}</td>
+            </tr>`;
+        });
+        container.innerHTML = table + '</table>';
+        MathJax.typesetPromise();
+    }
+
+    function updatePlotWithConstructedPoints(adjustRange = false) {
+        if (constructedPoints.length === 0) {
+            Plotly.restyle('plotDiv', {
+                x: [[]],
+                y: [[]], 
+                z: [[]],
+                hovertemplate: '%{text}',
+                text: []
+            }, [0]);
+            
+            if (document.getElementById('plotDiv').data && document.getElementById('plotDiv').data.length > 2) {
+                Plotly.deleteTraces('plotDiv', [2]);
+            }
+            return;
+        }
+        
+        const x_vals = constructedPoints.map(p => p.x);
+        const y_vals = constructedPoints.map(p => p.y);
+        const z_vals = constructedPoints.map(p => p.z);
+        
+        const p_val = parseFloat(pSlider.value);
+        const q_val = parseFloat(qSlider.value);
+        const hoverTexts = constructedPoints.map(point => {
+            const predicted_z = p_val * point.y - q_val * point.x;
+            const error = point.z - predicted_z;
+            
+            return `实际值: (${point.x}, ${point.y}, ${point.z.toFixed(2)})<br>` +
+                   `预测值: (${point.x}, ${point.y}, ${predicted_z.toFixed(2)})<br>` +
+                   `误差: ${error.toFixed(2)}`;
+        });
+        
+        if (isViewLocked && !adjustRange) {
+            currentLayout = JSON.parse(JSON.stringify(document.getElementById('plotDiv').layout));
+        }
+        
+        Plotly.restyle('plotDiv', {
+            x: [x_vals],
+            y: [y_vals],
+            z: [z_vals],
+            hovertemplate: '%{text}<extra></extra>',
+            text: [hoverTexts]
+        }, [0]);
+        
+        updatePredictedPoints();
+        
+        if (adjustRange) {
+            updatePlotRange();
+        }
+        
+        if (isViewLocked && currentLayout && !adjustRange) {
+            Plotly.relayout('plotDiv', currentLayout);
+        }
+    }
+
+    function updatePlotRange() {
+        if (constructedPoints.length === 0) return;
+        
+        const x_vals = constructedPoints.map(p => p.x);
+        const y_vals = constructedPoints.map(p => p.y);
+        const z_vals = constructedPoints.map(p => p.z);
+        
+        const x_range_data = Math.max(...x_vals) - Math.min(...x_vals);
+        const y_range_data = Math.max(...y_vals) - Math.min(...y_vals);
+        const z_range_data = Math.max(...z_vals) - Math.min(...z_vals);
+        
+        const max_range = Math.max(x_range_data, y_range_data, z_range_data);
+        
+        const x_center = (Math.min(...x_vals) + Math.max(...x_vals)) / 2;
+        const y_center = (Math.min(...y_vals) + Math.max(...y_vals)) / 2;
+        const z_center = (Math.min(...z_vals) + Math.max(...z_vals)) / 2;
+        
+        const scale_factor = 1.2;
+        
+        const x_range = [x_center - max_range * scale_factor / 2, x_center + max_range * scale_factor / 2];
+        const y_range = [y_center - max_range * scale_factor / 2, y_center + max_range * scale_factor / 2];
+        const z_range = [z_center - max_range * scale_factor / 2, z_center + max_range * scale_factor / 2];
+        
+        Plotly.relayout('plotDiv', {
+            'scene.xaxis.range': x_range,
+            'scene.yaxis.range': y_range,
+            'scene.zaxis.range': z_range,
+            'scene.aspectmode': 'cube'
+        });
+        
+        // 更新坐标轴刻度显示
+        updateAxisTicks();
+    }
+
+    function autoScale() {
+        if (constructedPoints.length === 0) return;
+        
+        Plotly.relayout('plotDiv', {
+            'scene.xaxis.autorange': true,
+            'scene.yaxis.autorange': true,
+            'scene.zaxis.autorange': true,
+            'scene.aspectmode': 'data'
+        });
+        
+        // 更新坐标轴刻度显示
+        setTimeout(updateAxisTicks, 100);
+    }
+
+    function updatePredictedPoints() {
+        if (constructedPoints.length === 0) return;
+        
+        const p_val = parseFloat(pSlider.value);
+        const q_val = parseFloat(qSlider.value);
+        const x_vals = constructedPoints.map(p => p.x);
+        const y_vals = constructedPoints.map(p => p.y);
+        const predicted_z_vals = constructedPoints.map(point => p_val * point.y - q_val * point.x);
+        
+        const predicted_hoverTexts = constructedPoints.map(point => {
+            const predicted_z = p_val * point.y - q_val * point.x;
+            return `预测点<br>(${point.x}, ${point.y}, ${predicted_z.toFixed(2)})<br>p=${p_val.toFixed(2)}, q=${q_val.toFixed(2)}`;
+        });
+        
+        if (document.getElementById('plotDiv').data && document.getElementById('plotDiv').data.length > 2) {
+            Plotly.restyle('plotDiv', {
+                x: [x_vals],
+                y: [y_vals],
+                z: [predicted_z_vals],
+                hovertemplate: '%{text}<extra></extra>',
+                text: [predicted_hoverTexts]
+            }, [2]);
+        } else {
+            Plotly.addTraces('plotDiv', {
+                x: x_vals,
+                y: y_vals,
+                z: predicted_z_vals,
+                mode: 'markers',
+                type: 'scatter3d',
+                name: '预测点',
+                marker: {
+                    color: '#3498db',
+                    size: 4,
+                    symbol: 'circle-open'
+                },
+                hovertemplate: '%{text}<extra></extra>',
+                text: predicted_hoverTexts
+            });
+        }
+    }
+
+    function linspace(start, end, num) {
+        const step = (end - start) / (num - 1);
+        return Array.from({length: num}, (_, i) => start + step * i);
+    }
+
+    function createInitialPlot(data) {
+        const tracePoints = {
+            x: [], y: [], z: [], 
+            mode: 'markers', 
+            type: 'scatter3d', 
+            name: '数据点',
+            marker: { color: '#e74c3c', size: 5 },
+            hovertemplate: '%{text}<extra></extra>',
+            text: []
+        };
+        
+        const layout = {
+            title: {
+                text: '',
+                font: { size: 16, color: '#2c3e50' },
+                x: 0.5,
+                y: 1,
+                xanchor: 'center',
+                yanchor: 'top'
+            },
+            scene: {
+                xaxis: { 
+                    title: {
+                        text: 'X: a<sub>n</sub>',
+                        font: { size: 14, color: '#f39c12' }
+                    },
+                    gridcolor: '#e0e0e0',
+                    gridwidth: 2,
+                    showgrid: true,
+                    backgroundcolor: 'rgba(240,240,240,0.1)',
+                    showline: true,
+                    linecolor: '#f39c12',
+                    linewidth: 4,
+                    zeroline: true,
+                    zerolinecolor: '#f39c12',
+                    zerolinewidth: 3,
+                    tickfont: { size: 12, color: '#666' },
+                    tickmode: 'auto',
+                    showticksuffix: 'all',
+                    autorange: true
+                },
+                yaxis: { 
+                    title: {
+                        text: 'Y: a<sub>n+1</sub>',
+                        font: { size: 14, color: '#27ae60' }
+                    },
+                    gridcolor: '#e0e0e0',
+                    gridwidth: 2,
+                    showgrid: true,
+                    backgroundcolor: 'rgba(240,240,240,0.1)',
+                    showline: true,
+                    linecolor: '#27ae60',
+                    linewidth: 4,
+                    zeroline: true,
+                    zerolinecolor: '#27ae60',
+                    zerolinewidth: 3,
+                    tickfont: { size: 12, color: '#666' },
+                    tickmode: 'auto',
+                    showticksuffix: 'all',
+                    autorange: true
+                },
+                zaxis: { 
+                    title: {
+                        text: 'Z: a<sub>n+3</sub>',
+                        font: { size: 14, color: '#e74c3c' }
+                    },
+                    gridcolor: '#e0e0e0',
+                    gridwidth: 2,
+                    showgrid: true,
+                    backgroundcolor: 'rgba(240,240,240,0.1)',
+                    showline: true,
+                    linecolor: '#e74c3c',
+                    linewidth: 4,
+                    zeroline: true,
+                    zerolinecolor: '#e74c3c',
+                    zerolinewidth: 3,
+                    tickfont: { size: 12, color: '#666' },
+                    tickmode: 'auto',
+                    showticksuffix: 'all',
+                    autorange: true
+                },
+                bgcolor: 'rgba(248,249,250,0.5)',
+                camera: {
+                    up: {x: 0, y: 0, z: 1},
+                    center: {x: 0, y: 0, z: 0},
+                    eye: {x: 1.5, y: 1.5, z: 1.5}
+                },
+                aspectmode: 'cube',
+                aspectratio: {
+                    x: 1,
+                    y: 1,
+                    z: 1
+                }
+            },
+            margin: { l: 0, r: 0, b: 80, t: 0 },
+            height: 550,
+            showlegend: true,
+            legend: {
+                x: 0.05,
+                y: 0.05,
+                bgcolor: 'rgba(255,255,255,0.9)',
+                bordercolor: '#dee2e6',
+                borderwidth: 1
+            }
+        };
+        
+        Plotly.newPlot('plotDiv', [tracePoints], layout).then(() => {
+            Plotly.addTraces('plotDiv', {
+                x: [], y: [], z: [], type: 'surface', name: '拟合平面',
+                colorscale: 'Blues', opacity: 0.6, showscale: false,
+                hovertemplate: '拟合平面<br>z = p·y - q·x<extra></extra>'
+            });
+            
+            Plotly.addTraces('plotDiv', {
+                x: [0],
+                y: [0],
+                z: [0],
+                mode: 'markers',
+                type: 'scatter3d',
+                name: '原点',
+                marker: {
+                    color: '#2c3e50',
+                    size: 6,
+                    symbol: 'circle'
+                },
+                hovertemplate: '原点 (0, 0, 0)<extra></extra>'
+            });
+            
+            updateManualPlane();
+        });
+        
+        currentLayout = JSON.parse(JSON.stringify(layout));
+    }
+
+    function updateManualPlane() {
+        const p_val = parseFloat(pSlider.value), q_val = parseFloat(qSlider.value);
+        
+        updateParameterDisplays(p_val, q_val);
+        
+        if (isViewLocked) {
+            currentLayout = JSON.parse(JSON.stringify(document.getElementById('plotDiv').layout));
+        }
+        
+        updatePlaneOnPlot(p_val, q_val);
+        updatePlotWithConstructedPoints(false);
+        updatePredictedPoints();
+        
+        const current_loss = calculateLossForParams(p_val, q_val);
+        updateLossDisplay(current_loss);
+        
+        if (!isTraining) {
+            trainingStatus.textContent = '手动调节模式';
+        }
+    }
+
+    function updatePlaneOnPlot(p_val, q_val) {
+        if (constructedPoints.length === 0) return;
+        
+        const currentLayout = document.getElementById('plotDiv').layout;
+        const x_range = currentLayout.scene.xaxis.range || [-10, 10];
+        const y_range = currentLayout.scene.yaxis.range || [-10, 10];
+        
+        const x_lin = linspace(x_range[0], x_range[1], 20);
+        const y_lin = linspace(y_range[0], y_range[1], 20);
+        const z_grid = y_lin.map(y_val => x_lin.map(x_val => p_val * y_val - q_val * x_val));
+        
+        Plotly.restyle('plotDiv', { x: [x_lin], y: [y_lin], z: [z_grid] }, [1]);
+        
+        // 更新坐标轴刻度显示格式
+        updateAxisTicks();
+        
+        if (isViewLocked && currentLayout) {
+            Plotly.relayout('plotDiv', currentLayout);
+        }
+    }
+
+    function updateAxisTicks() {
+        if (constructedPoints.length === 0) return;
+        
+        const x_vals = constructedPoints.map(p => p.x);
+        const y_vals = constructedPoints.map(p => p.y);
+        const z_vals = constructedPoints.map(p => p.z);
+        
+        const allValues = [...x_vals, ...y_vals, ...z_vals];
+        const maxAbsValue = Math.max(...allValues.map(Math.abs));
+        
+        // 如果最大值超过1000，则使用k格式
+        if (maxAbsValue >= 1000) {
+            // 获取当前坐标轴范围
+            const plotLayout = document.getElementById('plotDiv').layout;
+            const x_range = plotLayout.scene.xaxis.range || [Math.min(...x_vals), Math.max(...x_vals)];
+            const y_range = plotLayout.scene.yaxis.range || [Math.min(...y_vals), Math.max(...y_vals)];
+            const z_range = plotLayout.scene.zaxis.range || [Math.min(...z_vals), Math.max(...z_vals)];
+            
+            // 为每个坐标轴生成合适的刻度
+            const generateTicks = (range) => {
+                const min = range[0], max = range[1];
+                const numTicks = 5;
+                const step = (max - min) / (numTicks - 1);
+                const ticks = [];
+                for (let i = 0; i < numTicks; i++) {
+                    ticks.push(min + i * step);
+                }
+                return ticks;
+            };
+            
+            const x_ticks = generateTicks(x_range);
+            const y_ticks = generateTicks(y_range);
+            const z_ticks = generateTicks(z_range);
+            
+            Plotly.relayout('plotDiv', {
+                'scene.xaxis.tickvals': x_ticks,
+                'scene.xaxis.ticktext': x_ticks.map(formatAxisNumber),
+                'scene.yaxis.tickvals': y_ticks,
+                'scene.yaxis.ticktext': y_ticks.map(formatAxisNumber),
+                'scene.zaxis.tickvals': z_ticks,
+                'scene.zaxis.ticktext': z_ticks.map(formatAxisNumber)
+            });
+        } else {
+            // 恢复默认显示
+            Plotly.relayout('plotDiv', {
+                'scene.xaxis.tickvals': null,
+                'scene.xaxis.ticktext': null,
+                'scene.yaxis.tickvals': null,
+                'scene.yaxis.ticktext': null,
+                'scene.zaxis.tickvals': null,
+                'scene.zaxis.ticktext': null
+            });
+        }
+    }
+
+    function toggleViewLock() {
+        isViewLocked = !isViewLocked;
+        if (isViewLocked) {
+            currentLayout = JSON.parse(JSON.stringify(document.getElementById('plotDiv').layout));
+            lockViewButton.classList.add('active');
+            lockViewButton.textContent = '视角已固定';
+        } else {
+            lockViewButton.classList.remove('active');
+            lockViewButton.textContent = '固定视角';
+        }
+    }
+
+    function resetView() {
+        isViewLocked = false;
+        lockViewButton.classList.remove('active');
+        lockViewButton.textContent = '固定视角';
+        currentLayout = null;
+        
+        Plotly.relayout('plotDiv', {
+            'scene.camera': {
+                up: {x: 0, y: 0, z: 1},
+                center: {x: 0, y: 0, z: 0},
+                eye: {x: 1.5, y: 1.5, z: 1.5}
+            },
+            'scene.xaxis.autorange': true,
+            'scene.yaxis.autorange': true,
+            'scene.zaxis.autorange': true,
+            'scene.aspectmode': 'cube'
+        });
+        
+        setTimeout(() => {
+            updatePlotRange();
+        }, 100);
+    }
+
+    function resetTraining() {
+        if (isTraining) {
+            isTraining = false;
+        }
+        resetTrainingState();
+    }
+
+    function singleStepTraining() {
+        if (!trainingData || isTraining) return;
+        
+        const { X_norm_x, X_norm_y, z_norm } = trainingData;
+        const lr = 0.001;
+        const beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8;
+        
+        let total_loss = 0, grad_p = 0, grad_q = 0;
+
+        for (let i = 0; i < X_norm_x.length; i++) {
+            const y_pred = p * X_norm_y[i] - q * X_norm_x[i];
+            const error = y_pred - z_norm[i];
+            total_loss += error * error;
+            grad_p += 2 * error * X_norm_y[i];
+            grad_q += 2 * error * (-X_norm_x[i]);
+        }
+        grad_p /= X_norm_x.length; grad_q /= X_norm_x.length;
+        
+        m_p = beta1 * m_p + (1 - beta1) * grad_p;
+        m_q = beta1 * m_q + (1 - beta1) * grad_q;
+        v_p = beta2 * v_p + (1 - beta2) * (grad_p ** 2);
+        v_q = beta2 * v_q + (1 - beta2) * (grad_q ** 2);
+        
+        currentEpoch++;
+        const m_p_hat = m_p / (1 - beta1 ** currentEpoch);
+        const m_q_hat = m_q / (1 - beta1 ** currentEpoch);
+        const v_p_hat = v_p / (1 - beta2 ** currentEpoch);
+        const v_q_hat = v_q / (1 - beta2 ** currentEpoch);
+
+        p -= lr * m_p_hat / (Math.sqrt(v_p_hat) + epsilon);
+        q -= lr * m_q_hat / (Math.sqrt(v_q_hat) + epsilon);
+
+        const current_loss = total_loss / X_norm_x.length;
+        
+        const convergence_rate = calculateConvergenceRate(current_loss);
+        
+        lossHistory.push({ epoch: currentEpoch, loss: current_loss });
+        
+        pSlider.value = p;
+        qSlider.value = q;
+        updateParameterDisplays(p, q);
+        
+        updateLossDisplay(current_loss);
+        updateConvergenceRateDisplay(convergence_rate);
+        trainingStatus.textContent = `单步训练 - 第 ${currentEpoch} 步`;
+        
+        updatePlaneOnPlot(p, q);
+        updatePredictedPoints();
+        updateLossPlot();
+    }
+
+    async function hundredStepsTraining() {
+        if (!trainingData || isTraining) return;
+        
+        trainButton.disabled = true;
+        singleStepButton.disabled = true;
+        hundredStepsButton.disabled = true;
+        resetTrainButton.disabled = true;
+        buttonStatus.textContent = '训练100步中...';
+        isTraining = true;
+        
+        const { X_norm_x, X_norm_y, z_norm } = trainingData;
+        const lr = 0.001;
+        const beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8;
+        const targetSteps = 100;
+        const startEpoch = currentEpoch;
+
+        for (let step = 1; step <= targetSteps && isTraining; step++) {
+            let total_loss = 0, grad_p = 0, grad_q = 0;
+
+            for (let i = 0; i < X_norm_x.length; i++) {
+                const y_pred = p * X_norm_y[i] - q * X_norm_x[i];
+                const error = y_pred - z_norm[i];
+                total_loss += error * error;
+                grad_p += 2 * error * X_norm_y[i];
+                grad_q += 2 * error * (-X_norm_x[i]);
+            }
+            grad_p /= X_norm_x.length; grad_q /= X_norm_x.length;
+            
+            m_p = beta1 * m_p + (1 - beta1) * grad_p;
+            m_q = beta1 * m_q + (1 - beta1) * grad_q;
+            v_p = beta2 * v_p + (1 - beta2) * (grad_p ** 2);
+            v_q = beta2 * v_q + (1 - beta2) * (grad_q ** 2);
+            
+            currentEpoch++;
+            const m_p_hat = m_p / (1 - beta1 ** currentEpoch);
+            const m_q_hat = m_q / (1 - beta1 ** currentEpoch);
+            const v_p_hat = v_p / (1 - beta2 ** currentEpoch);
+            const v_q_hat = v_q / (1 - beta2 ** currentEpoch);
+
+            p -= lr * m_p_hat / (Math.sqrt(v_p_hat) + epsilon);
+            q -= lr * m_q_hat / (Math.sqrt(v_q_hat) + epsilon);
+
+            const current_loss = total_loss / X_norm_x.length;
+            
+            const convergence_rate = calculateConvergenceRate(current_loss);
+
+            lossHistory.push({ epoch: currentEpoch, loss: current_loss });
+
+            // 每10步更新一次显示，避免过于频繁的UI更新
+            if (step % 10 === 0 || step === 1 || step === targetSteps) {
+                updateLossDisplay(current_loss);
+                updateConvergenceRateDisplay(convergence_rate);
+                trainingStatus.textContent = `训练100步 - 第 ${currentEpoch} 步 (${step}/100)`;
+                updatePlaneOnPlot(p, q);
+                pSlider.value = p;
+                qSlider.value = q;
+                updateParameterDisplays(p, q);
+                updatePredictedPoints();
+                updateLossPlot();
+                
+                // 短暂暂停，让UI有机会更新
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+        }
+        
+        trainButton.disabled = false;
+        singleStepButton.disabled = false;
+        hundredStepsButton.disabled = false;
+        resetTrainButton.disabled = false;
+        buttonStatus.textContent = '100步训练完成';
+        trainingStatus.textContent = `100步训练完成 - 总步数: ${currentEpoch}`;
+        isTraining = false;
+    }
+
+    async function trainAndAnimate() {
+        if (isTraining) return;
+        
+        trainButton.disabled = true;
+        singleStepButton.disabled = true;
+        hundredStepsButton.disabled = true;
+        resetTrainButton.disabled = true;
+        buttonStatus.textContent = '训练中...';
+        isTraining = true;
+        
+        const { X_norm_x, X_norm_y, z_norm } = trainingData;
+        const lr = 0.001, numEpochs = 10000;
+        const beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8;
+
+        for (let epoch = currentEpoch + 1; epoch <= numEpochs && isTraining; epoch++) {
+            let total_loss = 0, grad_p = 0, grad_q = 0;
+
+            for (let i = 0; i < X_norm_x.length; i++) {
+                const y_pred = p * X_norm_y[i] - q * X_norm_x[i];
+                const error = y_pred - z_norm[i];
+                total_loss += error * error;
+                grad_p += 2 * error * X_norm_y[i];
+                grad_q += 2 * error * (-X_norm_x[i]);
+            }
+            grad_p /= X_norm_x.length; grad_q /= X_norm_x.length;
+            
+            m_p = beta1 * m_p + (1 - beta1) * grad_p;
+            m_q = beta1 * m_q + (1 - beta1) * grad_q;
+            v_p = beta2 * v_p + (1 - beta2) * (grad_p ** 2);
+            v_q = beta2 * v_q + (1 - beta2) * (grad_q ** 2);
+            
+            currentEpoch = epoch;
+            const m_p_hat = m_p / (1 - beta1 ** epoch);
+            const m_q_hat = m_q / (1 - beta1 ** epoch);
+            const v_p_hat = v_p / (1 - beta2 ** epoch);
+            const v_q_hat = v_q / (1 - beta2 ** epoch);
+
+            p -= lr * m_p_hat / (Math.sqrt(v_p_hat) + epsilon);
+            q -= lr * m_q_hat / (Math.sqrt(v_q_hat) + epsilon);
+
+            const current_loss = total_loss / X_norm_x.length;
+            
+            const convergence_rate = calculateConvergenceRate(current_loss);
+
+            lossHistory.push({ epoch: currentEpoch, loss: current_loss });
+
+            if (epoch % 50 === 0 || epoch === 1) {
+                updateLossDisplay(current_loss);
+                updateConvergenceRateDisplay(convergence_rate);
+                trainingStatus.textContent = `训练中 - 第 ${epoch}/${numEpochs} 轮`;
+                updatePlaneOnPlot(p, q);
+                pSlider.value = p;
+                qSlider.value = q;
+                updateParameterDisplays(p, q);
+                updatePredictedPoints();
+                updateLossPlot();
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+        }
+        
+        trainButton.disabled = false;
+        singleStepButton.disabled = false;
+        hundredStepsButton.disabled = false;
+        resetTrainButton.disabled = false;
+        buttonStatus.textContent = '训练已完成，可再次训练';
+        trainingStatus.textContent = '训练完成';
+        isTraining = false;
+    }
+</script>
+<footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 14px; line-height: 1.5;">
+    <p style="margin: 5px 0;">© 2025 付佳兴、马衍龙、郑子杰及AI4S TEEN CAMP组委会</p>
+    <p style="margin: 5px 0; font-size: 13px;">本教学材料仅供课堂教学与学术交流使用，未经书面许可，不得用于任何商业用途。</p>
+</footer>
+</body>
+</html>
