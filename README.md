@@ -44,17 +44,21 @@ AI4S 青少年人工智能驱动科学挑战营 · 官方开源课程资源库
   
 ## 💻 在线访问 / Online Demos  
   
-交互式 HTML 资源将上线 GitHub Pages：  
+交互式 HTML 资源将上线 GitHub Pages： 
+
+**算法比赛入门**
+
+[算法比赛入门](https://kashadong.github.io/ai4s-teen-camp-2026/task5-sequences/what-is-competition-v2.html)
 
 **任务一：天气瓶中的数据科学**
 
-[👉 赛题发布](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/challenge-announcement.html)
+[赛题发布](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/challenge-announcement.html)
 
-[✨ 数据清洗过程可视化](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/data-cleaning-visualization.html)
+[数据清洗过程可视化](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/data-cleaning-visualization.html)
 
-[🔄 数据转置演示](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/data-transpose.html)
+[数据转置演示](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/data-transpose.html)
 
-[🧩 逻辑梳理互动](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/logic-interactive.html)
+[逻辑梳理互动](https://kashadong.github.io/ai4s-teen-camp-2026/task1-weather/logic-interactive.html)
 
 **任务二：神秘空间的引力规律**
 
