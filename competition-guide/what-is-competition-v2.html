@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算法比赛入门指南 - 问题提炼与模型评估</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(120deg, #1f3c88, #2176ff);
+            padding: 40px;
+            text-align: center;
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 2.6rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.15rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 45px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-size: 1.9rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #2176ff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #1f3c88;
+        }
+
+        .section-title::before {
+            content: "🧠";
+            font-size: 1.9rem;
+        }
+
+        .section:nth-of-type(2) .section-title::before {
+            content: "📊";
+        }
+
+        .example-card {
+            background: linear-gradient(135deg, #edf4ff, #fff);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 10px 25px rgba(46, 134, 222, 0.18);
+            border-left: 6px solid #2176ff;
+            line-height: 1.8;
+        }
+
+        .image-gallery {
+            margin-top: 25px;
+            background: #f8f9fb;
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .cell-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: none;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #e0f0ff, #c8dcff);
+            color: #1f3c88;
+            border: 2px dashed #8fb1ff;
+        }
+
+        .cell-label {
+            padding: 14px;
+            text-align: center;
+            background: #fff;
+            font-weight: 600;
+            color: #1f3c88;
+        }
+
+        .image-caption {
+            text-align: center;
+            padding: 12px;
+            background: #f3f6ff;
+            color: #56647a;
+            font-size: 0.92rem;
+        }
+
+        .image-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .image-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            position: relative;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .modal-content img {
+            max-width: 600px;
+            width: 100%;
+            border-radius: 12px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .interactive-demo {
+            margin-top: 35px;
+            background: #f0f4ff;
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        .example-images-box {
+            border: 2px solid #2176ff;
+            border-radius: 14px;
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 28px;
+        }
+
+        .draggable-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+        }
+
+        .draggable-image-item {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+            cursor: grab;
+        }
+
+        .draggable-image-item.dragging {
+            opacity: 0.6;
+        }
+
+        .draggable-image-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .image-label {
+            text-align: center;
+            padding: 8px;
+            background: #f8f9fb;
+            font-size: 0.85rem;
+            color: #56647a;
+        }
+
+        .ai-pipeline {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .pipeline-step {
+            flex: 1;
+            min-width: 250px;
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .input-slot {
+            border: 3px dashed #9bb0d4;
+            border-radius: 12px;
+            min-height: 190px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fbff;
+            position: relative;
+        }
+
+        .input-slot.drag-over {
+            border-color: #2176ff;
+            background: #e5f0ff;
+        }
+
+        .slot-placeholder {
+            text-align: center;
+            color: #8aa0c1;
+        }
+
+        .slot-placeholder .placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .ai-processor {
+            min-height: 150px;
+            border-radius: 12px;
+            background: #f8f9fb;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .processor-icon {
+            font-size: 3rem;
+        }
+
+        .loading-spinner {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 4px solid #d1d9e6;
+            border-top: 4px solid #2176ff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .output-result {
+            min-height: 160px;
+            background: #f8f9fb;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .result-label {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .result-description {
+            color: #56647a;
+            line-height: 1.6;
+        }
+
+        .demo-controls {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            border: none;
+            border-radius: 999px;
+            padding: 12px 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(135deg, #2176ff, #21d4fd);
+            box-shadow: 0 10px 20px rgba(33, 118, 255, 0.35);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* 模型评估部分 */
+        .evaluation-intro {
+            background: #eef6ff;
+            border-radius: 14px;
+            padding: 22px;
+            line-height: 1.8;
+            border-left: 5px solid #2176ff;
+        }
+
+        .evaluation-layout {
+            display: flex;
+            gap: 25px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .dataset-column,
+        .summary-column {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .model-column {
+            flex: 2;
+            min-width: 320px;
+        }
+
+        .dataset-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            margin-bottom: 18px;
+            border-left: 5px solid transparent;
+        }
+
+        .dataset-card.training {
+            border-left-color: #2176ff;
+        }
+
+        .dataset-card.test {
+            border-left-color: #e67e22;
+        }
+
+        .dataset-card.dragging {
+            opacity: 0.7;
+        }
+
+        .dataset-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1f3c88;
+        }
+
+        .dataset-size {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 600;
+            background: #f0f4ff;
+            color: #2176ff;
+        }
+
+        .training-block-title {
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: #1f3c88;
+            font-weight: 700;
+        }
+
+        .training-layout {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .training-layout .dataset-column {
+            flex: 0 0 260px;
+        }
+
+        .training-layout .model-column {
+            flex: 1;
+        }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        .model-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .model-header {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .model-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: #eef2ff;
+            color: #1f3c88;
+            font-weight: 700;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .model-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .model-train-zone {
+            border: 2px dashed #d1d8ec;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            min-height: 100px;
+            color: #8aa0c1;
+            background: #f8fbff;
+        }
+
+        .model-train-zone.drag-over {
+            border-color: #2176ff;
+            color: #1f3c88;
+            background: #e6f0ff;
+        }
+
+        .model-train-zone.loaded {
+            border-color: #2ecc71;
+            background: #e8f9f1;
+            color: #1b7a46;
+        }
+
+        .train-model-btn,
+        .submit-model-btn,
+        .accuracy-btn {
+            width: 100%;
+            border-radius: 12px;
+            font-size: 0.95rem;
+        }
+
+        .accuracy-btn {
+            background: linear-gradient(135deg, #ffb347, #ffcc33);
+        }
+
+        .submit-model-btn {
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+        }
+
+        .model-status {
+            text-align: center;
+            padding: 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            background: #f0f2f7;
+            color: #68778f;
+        }
+
+        .model-status.ready {
+            background: #eaf3ff;
+            color: #1f6feb;
+        }
+
+        .model-status.training {
+            background: #fff7e6;
+            color: #c27c08;
+        }
+
+        .model-status.success {
+            background: #e7f8f0;
+            color: #1e8d5c;
+        }
+
+        .model-status.warning {
+            background: #ffecec;
+            color: #c0392b;
+        }
+
+        .evaluation-console {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+
+        .evaluation-console h4 {
+            color: #1f3c88;
+            margin-bottom: 10px;
+        }
+
+        .evaluation-console .hint {
+            color: #5c6c82;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .evaluation-model-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .evaluation-model-btn {
+            flex: 1;
+            min-width: 140px;
+            border-radius: 12px;
+            padding: 10px 15px;
+            border: 2px solid #dfe6fb;
+            background: #f8fbff;
+            color: #1f3c88;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .evaluation-model-btn.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .evaluation-model-btn.active {
+            border-color: #2176ff;
+            background: #e7f0ff;
+            box-shadow: 0 5px 12px rgba(33,118,255,0.2);
+        }
+
+        .test-drop-zone {
+            border: 2px dashed #c9d4f2;
+            border-radius: 14px;
+            padding: 25px;
+            text-align: center;
+            background: #f8fbff;
+            color: #6b7894;
+            min-height: 150px;
+            transition: all 0.2s;
+        }
+
+        .test-drop-zone.drag-over {
+            border-color: #ff9800;
+            background: #fff3e0;
+            color: #c56a1d;
+        }
+
+        .test-result {
+            margin-top: 18px;
+            background: #f6f8ff;
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: inset 0 0 0 1px #e0e7ff;
+        }
+
+        .test-result-title {
+            font-weight: 700;
+            color: #1f3c88;
+            margin-bottom: 6px;
+        }
+
+        .test-result-accuracy {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ff8c00;
+            margin: 8px 0;
+        }
+
+        .test-result-text {
+            color: #5c6c82;
+            line-height: 1.6;
+        }
+
+        .alert-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff4e5;
+            color: #d35400;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.88rem;
+        }
+
+        .shake {
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            50% { transform: translateX(4px); }
+            75% { transform: translateX(-4px); }
+            100% { transform: translateX(0); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            background: #f0f2f7;
+            color: #7a8699;
+        }
+
+        /* 榜单说明部分（新版） */
+        .trust-section {
+            background: #f8f9ff;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .overfit-section {
+            background: #fff;
+            border-radius: 16px;
+            padding: 25px;
+            border-left: 6px solid #ff8c00;
+            box-shadow: 0 10px 25px rgba(255,140,0,0.15);
+        }
+
+        .overfit-section h3 {
+            margin-bottom: 15px;
+            color: #d35400;
+        }
+
+        .loop-track {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .loop-card {
+            background: #fff4e5;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #ffd7b3;
+            position: relative;
+        }
+
+        .loop-card::after {
+            content: "↻";
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            color: #ff8c00;
+        }
+
+        .overfit-result {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .overfit-result-card {
+            flex: 1;
+            min-width: 220px;
+            background: #f8fbff;
+            border-radius: 14px;
+            padding: 18px;
+            border: 1px solid #dfe6fb;
+        }
+
+        .overfit-result-card.fail {
+            border-color: #ffb09c;
+            background: #fff1ed;
+        }
+
+        .overfit-result-card h4 {
+            margin: 0 0 8px;
+            color: #1f3c88;
+        }
+
+        .overfit-result-card.fail h4 {
+            color: #c0392b;
+        }
+
+        .ming-flow-area {
+            margin-top: 20px;
+            background: #fffdf7;
+            border-radius: 18px;
+            border: 1px solid #ffe0b2;
+            padding: 22px;
+            box-shadow: inset 0 0 0 1px #fff5dd;
+        }
+
+        .ming-flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: stretch;
+            margin-bottom: 18px;
+        }
+
+        .ming-step {
+            flex: 1;
+            min-width: 200px;
+            background: #fff;
+            border-radius: 14px;
+            border: 2px solid #ffd89c;
+            padding: 16px;
+            box-shadow: 0 8px 18px rgba(255,184,108,0.2);
+        }
+
+        .ming-step.leaderboard {
+            border-color: #c9d9ff;
+            background: #f6f9ff;
+            box-shadow: 0 8px 18px rgba(33,118,255,0.12);
+        }
+
+        .ming-step h4 {
+            margin: 0 0 8px;
+            color: #c05a00;
+            font-size: 1rem;
+        }
+
+        .ming-step.leaderboard h4 {
+            color: #1f3c88;
+        }
+
+        .ming-step p {
+            margin: 0;
+            color: #6b4a1f;
+            line-height: 1.6;
+        }
+
+        .flow-arrow {
+            font-size: 1.6rem;
+            color: #f39c12;
+            align-self: center;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .leaderboard-preview {
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid #e6edff;
+            padding: 16px;
+            box-shadow: 0 8px 20px rgba(31,118,235,0.12);
+            margin-bottom: 12px;
+        }
+
+        .leaderboard-preview h4 {
+            margin: 0 0 8px;
+            color: #1f3c88;
+        }
+
+        .leaderboard-preview ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .leaderboard-preview li {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #dde5ff;
+            color: #56647a;
+            font-weight: 600;
+        }
+
+        .leaderboard-preview li:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-preview li.highlight {
+            color: #d35400;
+        }
+
+        .ming-log {
+            max-height: 160px;
+            overflow-y: auto;
+            border-radius: 12px;
+            border: 1px dashed #ffd89c;
+            padding: 12px;
+            background: #fff;
+            margin-bottom: 12px;
+        }
+
+        .ming-log-entry {
+            padding: 8px;
+            border-bottom: 1px dashed #ffe5c2;
+            color: #6b4a1f;
+        }
+
+        .ming-log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .ming-log-entry strong {
+            color: #d35400;
+            margin-right: 6px;
+        }
+
+        .ming-action-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #ffb347, #ffcc33);
+            color: #8a4600;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255,179,71,0.35);
+        }
+
+        .ming-action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .ming-hint {
+            margin-top: 10px;
+            color: #8a6d1d;
+            font-size: 0.95rem;
+        }
+
+        .ming-newdata {
+            margin-top: 18px;
+            background: #f8fbff;
+            border-radius: 16px;
+            border: 1px solid #dfe6fb;
+            padding: 18px;
+            display: none;
+        }
+
+        .ming-newdata h4 {
+            margin: 0 0 8px;
+            color: #1f3c88;
+        }
+
+        .ming-stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+
+        .ming-stat-card {
+            flex: 1;
+            min-width: 180px;
+            border-radius: 12px;
+            padding: 14px;
+            background: #fff;
+            border: 1px solid #dfe6fb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #1f3c88;
+        }
+
+        .ming-stat-card.fail {
+            border-color: #ffc2b5;
+            color: #c0392b;
+        }
+
+        .ming-stat-card span {
+            font-size: 1.4rem;
+        }
+
+        .ming-newdata p {
+            margin: 0;
+            color: #56647a;
+            line-height: 1.6;
+        }
+
+        .overfit-question {
+            margin-top: 10px;
+            padding: 14px 18px;
+            background: #fffbe6;
+            border-radius: 12px;
+            border-left: 4px solid #f1c40f;
+            color: #8a6d1d;
+            font-weight: 600;
+        }
+
+        .split-section {
+            background: #fff;
+            border-radius: 16px;
+            padding: 25px;
+            border-left: 6px solid #1f6feb;
+            box-shadow: 0 10px 25px rgba(31,111,235,0.15);
+        }
+
+        .split-flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        .split-card {
+            flex: 1;
+            min-width: 230px;
+            background: #f8fbff;
+            border-radius: 14px;
+            padding: 18px;
+            border: 1px solid #dfe6fb;
+        }
+
+        .split-card.public {
+            border-left: 5px solid #52b3ff;
+        }
+
+        .split-card.private {
+            border-left: 5px solid #ffb347;
+        }
+
+        .split-card h4 {
+            margin: 0 0 8px;
+            color: #1f3c88;
+        }
+
+        .split-card ul {
+            margin: 8px 0 0 18px;
+            color: #56647a;
+            line-height: 1.6;
+        }
+
+        .board-snippets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .board-card {
+            background: #fdfdff;
+            border-radius: 12px;
+            padding: 18px;
+            border: 1px solid #e0e7ff;
+        }
+
+        .board-card h5 {
+            margin: 0 0 10px;
+            color: #1f3c88;
+        }
+
+        .board-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            color: #56647a;
+        }
+
+        .board-card li {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #e3e8f7;
+            font-weight: 600;
+        }
+
+        .split-note {
+            margin-top: 18px;
+            padding: 14px 16px;
+            background: #eef6ff;
+            border-radius: 12px;
+            color: #1f3c88;
+            line-height: 1.6;
+            border-left: 4px solid #2176ff;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .main-content {
+                padding: 25px;
+            }
+
+            .ai-pipeline {
+                flex-direction: column;
+            }
+
+            .evaluation-layout {
+                flex-direction: column;
+            }
+
+            .model-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .split-flow {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>算法比赛入门指南</h1>
+            <p class="subtitle">第一部分：问题提炼与算法示意 · 第二部分：模型评估与评分方式</p>
+        </header>
+
+        <div class="main-content">
+            <div class="section">
+                <h2 class="section-title">需要解决的问题</h2>
+                <div class="example-card">
+                    <p>王老师用显微镜拍摄了大量植物叶片细胞图像，发现主要可以分成三类：叶片表皮细胞、保护组织细胞和分生组织细胞。希望让 AI 自动识别图片中是哪种细胞，这样就不需要人工一个个判断。</p>
+                    <p style="margin-top: 15px; padding: 15px; border-radius: 12px; background: #fff; border: 1px dashed #2176ff;">
+                        <strong>问题提炼：</strong>给定一张 80×60 的植物细胞灰度图，让模型输出它属于哪一类细胞。
+                    </p>
+                </div>
+
+                <div class="image-gallery">
+                    <h3 style="color:#1f3c88; margin-bottom:10px;">📷 三类细胞示例</h3>
+                    <div class="gallery-grid">
+                        <div class="gallery-item" onclick="showImageModal('epidermis')">
+                            <img id="cell-image-epidermis" class="cell-image" alt="叶片表皮细胞">
+                            <div class="image-placeholder" id="placeholder-epidermis">
+                                <div style="font-size:2.5rem;">🖼️</div>
+                                <div>点击查看大图</div>
+                            </div>
+                            <div class="cell-label">叶片表皮细胞 · Epidermis</div>
+                            <p class="image-caption">覆盖叶片表面，形状较规则</p>
+                        </div>
+                        <div class="gallery-item" onclick="showImageModal('dermal')">
+                            <img id="cell-image-dermal" class="cell-image" alt="保护组织细胞">
+                            <div class="image-placeholder" id="placeholder-dermal">
+                                <div style="font-size:2.5rem;">🔬</div>
+                                <div>点击查看大图</div>
+                            </div>
+                            <div class="cell-label">保护组织细胞 · Dermal</div>
+                            <p class="image-caption">排列紧密，负责保护</p>
+                        </div>
+                        <div class="gallery-item" onclick="showImageModal('meristematic')">
+                            <img id="cell-image-meristematic" class="cell-image" alt="分生组织细胞">
+                            <div class="image-placeholder" id="placeholder-meristematic">
+                                <div style="font-size:2.5rem;">🌱</div>
+                                <div>点击查看大图</div>
+                            </div>
+                            <div class="cell-label">分生组织细胞 · Meristematic</div>
+                            <p class="image-caption">细胞更小，能持续分裂</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="interactive-demo">
+                    <h3 style="text-align:center; color:#1f3c88; margin-bottom:20px;">拖拽一张细胞图片，体验模型的工作流程</h3>
+
+                    <div class="example-images-box">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <h4 style="color:#1f3c88;">示例图片</h4>
+                            <p style="color:#697a94;">提示：拖拽到左侧输入接口即可</p>
+                        </div>
+                        <div class="draggable-images-grid" id="draggableImagesGrid"></div>
+                    </div>
+
+                    <div class="ai-pipeline">
+                        <div class="pipeline-step">
+                            <h4 style="color:#1f3c88;">① 输入接口</h4>
+                            <div class="input-slot" id="inputSlot" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                                <div class="slot-placeholder">
+                                    <div class="placeholder-icon">📥</div>
+                                    <p>把图片拖到这里</p>
+                                </div>
+                                <img id="inputImage" src="" alt="" style="display:none; max-width:100%; border-radius:12px;">
+                            </div>
+                        </div>
+                        <div class="pipeline-step">
+                            <h4 style="color:#1f3c88;">② AI 模型处理</h4>
+                            <div class="ai-processor" id="aiProcessor">
+                                <div class="processor-idle">
+                                    <div class="processor-icon">🤖</div>
+                                    <p>等待输入...</p>
+                                </div>
+                                <div class="processor-working" style="display:none;">
+                                    <div class="loading-spinner"></div>
+                                    <p>正在分析纹理特征...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pipeline-step">
+                            <h4 style="color:#1f3c88;">③ 输出结果</h4>
+                            <div class="output-result">
+                                <div class="result-placeholder" id="resultPlaceholder">
+                                    <div style="font-size:2.5rem; margin-bottom:8px;">📊</div>
+                                    <p>结果会显示在这里</p>
+                                </div>
+                                <div class="result-content" id="resultContent" style="display:none;">
+                                    <div class="result-label" id="resultLabel"></div>
+                                    <p class="result-description" id="resultDescription"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="demo-controls">
+                        <button id="resetDemoBtn">🔄 重置演示</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">如何评价一个 AI 模型？</h2>
+                <div class="evaluation-intro">
+                    在算法比赛中，我们会把数据分成两份：<strong>训练集</strong>用来教模型识别细胞；<strong>测试集</strong>被评委保密，用来衡量模型的真实能力——只有在测试集上依旧表现不错的模型才算优秀。
+                </div>
+
+                <div class="training-block-title">步骤一：训练并提交模型</div>
+                <div class="training-layout">
+                    <div class="dataset-column">
+                        <div class="dataset-card training" id="trainingDataset" draggable="true">
+                            <div class="dataset-title">训练集</div>
+                            <p>包含 3,000 张带标签的细胞图片，同学们可以自由使用它来训练任意模型。</p>
+                            <span class="dataset-size">📦 3,000 张 · 带标签</span>
+                            <p style="margin-top:10px; color:#5c6c82; font-size:0.92rem;">提示：同一个训练集可以拖拽给不同模型，比较它们的学习效果。</p>
+                        </div>
+                        <div class="alert-pill" style="margin-top:8px;">💡 小贴士：训练完成后记得“提交到评测区”</div>
+                    </div>
+
+                    <div class="model-column">
+                        <div class="model-grid">
+                            <div class="model-card" data-model="A">
+                                <div class="model-header">
+                                    <div class="model-icon">A</div>
+                                    <div>
+                                        <h4 style="margin:0;">模型 A · 轻量级 CNN</h4>
+                                        <p style="margin:4px 0 0; color:#6b7894;">结构简单，训练快，但对复杂纹理不够敏感。</p>
+                                    </div>
+                                </div>
+                                <div class="model-train-zone" data-model="A">
+                                    <div class="train-hint">把训练集拖到这里</div>
+                                </div>
+                                <div class="model-actions">
+                                    <button class="train-model-btn" data-model="A">训练模型</button>
+                                    <button class="submit-model-btn" data-model="A">提交到评测区</button>
+                                </div>
+                                <div class="model-status" id="status-A">等待训练集</div>
+                            </div>
+
+                            <div class="model-card" data-model="B">
+                                <div class="model-header">
+                                    <div class="model-icon">B</div>
+                                    <div>
+                                        <h4 style="margin:0;">模型 B · 增强版 CNN</h4>
+                                        <p style="margin:4px 0 0; color:#6b7894;">结合注意力模块和数据增强，兼顾速度与精度。</p>
+                                    </div>
+                                </div>
+                                <div class="model-train-zone" data-model="B">
+                                    <div class="train-hint">把训练集拖到这里</div>
+                                </div>
+                                <div class="model-actions">
+                                    <button class="train-model-btn" data-model="B">训练模型</button>
+                                    <button class="submit-model-btn" data-model="B">提交到评测区</button>
+                                </div>
+                                <div class="model-status" id="status-B">等待训练集</div>
+                            </div>
+
+                            <div class="model-card" data-model="C">
+                                <div class="model-header">
+                                    <div class="model-icon">C</div>
+                                    <div>
+                                        <h4 style="margin:0;">模型 C · Vision Transformer</h4>
+                                        <p style="margin:4px 0 0; color:#6b7894;">捕捉全局纹理的“巨无霸”，精度最高但训练最慢。</p>
+                                    </div>
+                                </div>
+                                <div class="model-train-zone" data-model="C">
+                                    <div class="train-hint">把训练集拖到这里</div>
+                                </div>
+                                <div class="model-actions">
+                                    <button class="train-model-btn" data-model="C">训练模型</button>
+                                    <button class="submit-model-btn" data-model="C">提交到评测区</button>
+                                </div>
+                                <div class="model-status" id="status-C">等待训练集</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="training-block-title">步骤二：在评测区用隐藏测试集打分</div>
+                <div class="evaluation-layout evaluation-stage">
+                    <div class="dataset-column">
+                        <div class="dataset-card test" id="testDataset" draggable="true">
+                            <div class="dataset-title">测试集</div>
+                            <p>评委手中“锁住”的 500 张图像。只有提交的模型才能在这里评测，系统只会返回准确率。</p>
+                            <span class="dataset-size">🔒 500 张 · 无标签</span>
+                            <p style="margin-top:10px; color:#c56a1d; font-size:0.92rem;">请拖拽到右侧评测区，查看模型在隐藏数据上的表现。</p>
+                        </div>
+                    </div>
+                    <div class="model-column">
+                        <div class="evaluation-console">
+                            <h4>评测控制台</h4>
+                            <p class="hint">流程：1) 选择已提交的模型 → 2) 拖拽测试集到下面的评测区 → 3) 查看准确率与点评</p>
+                            <div class="evaluation-model-buttons">
+                                <button class="evaluation-model-btn disabled" data-model="A">模型 A（待提交）</button>
+                                <button class="evaluation-model-btn disabled" data-model="B">模型 B（待提交）</button>
+                                <button class="evaluation-model-btn disabled" data-model="C">模型 C（待提交）</button>
+                            </div>
+                            <div class="test-drop-zone" id="testDropZone">
+                                <div style="font-size:2rem; margin-bottom:8px;">🧪</div>
+                                <p style="margin:0;">把测试集拖到这里启动评测</p>
+                                <small style="display:block; margin-top:6px; color:#a0abc4;">未选择模型或未提交将无法评测</small>
+                            </div>
+                            <div class="test-result" id="testResultPanel">
+                                <div class="test-result-title" id="evaluationResultTitle">尚未评测</div>
+                                <div class="test-result-accuracy" id="evaluationResultAccuracy">--%</div>
+                                <p class="test-result-text" id="evaluationResultText">提交模型并拖入测试集后，这里会显示真实准确率与建议。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section trust-section">
+                <h2 class="section-title">为什么还要 A 榜和 B 榜？</h2>
+                
+                <div class="overfit-section">
+                    <h3>小明一次次打榜，问题出在哪里？</h3>
+                    <p>小明参加了一个算法比赛，获得比赛第一的算法可以投入实际应用，为了获得第一名，他开始不断调整模型。下面是他的调试过程：</p>
+                    <div class="ming-flow-area">
+                        <div class="ming-flow">
+                            <div class="ming-step" id="mingTrainStep">
+                                <h4 id="mingTrainTitle">等待开始 · 训练</h4>
+                                <p id="mingTrainText">点击下方按钮，观察小明如何一步步打榜。</p>
+                            </div>
+                            <div class="flow-arrow">➡️</div>
+                            <div class="ming-step" id="mingSubmitStep">
+                                <h4 id="mingSubmitTitle">提交记录</h4>
+                                <p id="mingSubmitText">尚未提交</p>
+                            </div>
+                            <div class="flow-arrow">➡️</div>
+                            <div class="ming-step leaderboard" id="mingRankStep">
+                                <h4 id="mingRankTitle">小明的排名</h4>
+                                <p id="mingRankText">还没有排名</p>
+                            </div>
+                        </div>
+                        <div class="leaderboard-preview">
+                            <h4>榜单片段（A 榜）</h4>
+                            <ul id="mingLeaderboardList">
+                                <li><span>模型 C</span><span>95.0</span></li>
+                                <li><span>模型 B</span><span>93.2</span></li>
+                                <li><span>模型 A</span><span>92.5</span></li>
+                            </ul>
+                        </div>
+                        <div class="ming-log" id="mingLog">
+                            <div class="ming-log-entry">
+                                <strong>提示</strong>点击“开始小明的打榜”，看看他为了冲分都做了什么。
+                            </div>
+                        </div>
+                        <button class="ming-action-btn" id="mingNextBtn">开始小明的打榜</button>
+                        <div class="ming-hint" id="mingHintText">小明准备进行第 1 次训练与提交。</div>
+                    </div>
+                    <div class="ming-newdata" id="mingNewData">
+                        <h4>算法上线后的真实表现</h4>
+                        <p id="mingFinalText">上线当天，小明的新数据通过率只有 72 分，同学们都惊呆了——榜上不是第一名吗？</p>
+                        <div class="ming-stats">
+                            <div class="ming-stat-card">
+                                <div>排行榜成绩</div>
+                                <span id="mingPublicFinal">98 分</span>
+                            </div>
+                            <div class="ming-stat-card fail">
+                                <div>真实数据成绩</div>
+                                <span id="mingFreshFinal">72 分</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overfit-question">
+                        思考题：小明一直在排行榜上“刷题”，可是一换真实场景就掉分了——你觉得问题出在哪里？
+                    </div>
+                </div>
+
+                <div class="split-section">
+                    <h3>比赛是怎么避免“背模拟题”的？</h3>
+                    <p>真正的 AI 赛事会把测试集再细分：一部分给参赛者随时查看成绩，另一部分用于最终排名。</p>
+                    <div class="split-flow">
+                        <div class="split-card">
+                            <h4>训练集</h4>
+                            <p>我们上面训练模型 A/B/C 时用的数据。</p>
+                            <ul>
+                                <li>公开，可直接访问</li>
+                                <li>用来教模型“细胞该怎么分”</li>
+                            </ul>
+                        </div>
+                        <div class="split-card public">
+                            <h4>公共测试集（Public Test）</h4>
+                            <p>形成 <strong>A 榜</strong>，榜单实时公开。</p>
+                            <ul>
+                                <li>不能直接访问</li>
+                                <li>帮助看模型有没有进步</li>
+                            </ul>
+                        </div>
+                        <div class="split-card private">
+                            <h4>私有测试集（Private Test）</h4>
+                            <p>形成 <strong>B 榜</strong>，比赛结束后公布，用于最终排名</p>
+                            <ul>
+                                <li>不能直接访问</li>
+                                <li>比赛结束后最终排名</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="board-snippets">
+                        <div class="board-card">
+                            <h5>A 榜（公开，可查看实时排名）</h5>
+                            <ul>
+                                <li><span>模型 A</span><span>97.5</span></li>
+                                <li><span>模型 C</span><span>94.0</span></li>
+                                <li><span>模型 B</span><span>92.8</span></li>
+                            </ul>
+                            <p style="margin-top:10px; color:#56647a;">像模拟考排名，随时刷新。</p>
+                        </div>
+                        <div class="board-card">
+                            <h5>B 榜（隐藏，比赛结束后公布，用于最终排名）</h5>
+                            <ul>
+                                <li><span>模型 C</span><span>93.5</span></li>
+                                <li><span>模型 B</span><span>88.6</span></li>
+                                <li><span>模型 A</span><span>81.0</span></li>
+                            </ul>
+                            <p style="margin-top:10px; color:#56647a;">相当于中考，决定最终名次。</p>
+                        </div>
+                    </div>
+                    <div class="split-note">
+                        ⏱ 小结：A 榜帮助我们随时调试；B 榜确保模型不是背答案，而是真正掌握了“细胞该怎么分”。这就是为什么比赛会同时设置两个榜单。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            © 2025 AI4S TEEN CAMP 组委会
+        </footer>
+    </div>
+
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-modal" onclick="closeImageModal()">&times;</span>
+            <div id="modalImageContainer"></div>
+            <p id="modalCaption" style="margin-top:12px; color:#56647a; text-align:center;"></p>
+        </div>
+    </div>
+
+    <script>
+        const cellImages = {
+            epidermis: {
+                src: '/ai4s-teen-camp-2026/images/1174-表皮细胞.jpg',
+                caption: '叶片表皮细胞：覆盖叶片表面，细胞形状较规整。'
+            },
+            dermal: {
+                src: '/ai4s-teen-camp-2026/images/1175-保护组织.jpg',
+                caption: '保护组织细胞：排列紧密、层层防护。'
+            },
+            meristematic: {
+                src: '/ai4s-teen-camp-2026/images/1173-分生组织.jpg',
+                caption: '分生组织细胞：体积较小，能持续分裂。'
+            }
+        };
+
+        function initializeCellImages() {
+            Object.keys(cellImages).forEach(key => {
+                const data = cellImages[key];
+                const img = document.getElementById(`cell-image-${key}`);
+                const placeholder = document.getElementById(`placeholder-${key}`);
+                if (!img || !placeholder) return;
+
+                img.onload = () => {
+                    img.style.display = 'block';
+                    placeholder.style.display = 'none';
+                };
+                img.onerror = () => {
+                    placeholder.innerHTML = '<div>图片加载失败</div>';
+                };
+                img.src = data.src;
+            });
+        }
+
+        function showImageModal(key) {
+            const data = cellImages[key];
+            if (!data) return;
+            const modal = document.getElementById('imageModal');
+            const container = document.getElementById('modalImageContainer');
+            const caption = document.getElementById('modalCaption');
+            container.innerHTML = `<img src="${data.src}" alt="${data.caption}">`;
+            caption.textContent = data.caption;
+            modal.classList.add('active');
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        const testImages = [
+            { id: 'test1', src: '/ai4s-teen-camp-2026/images/1180.jpg', label: '分生组织细胞', description: '细胞较小，分裂活跃。' },
+            { id: 'test2', src: '/ai4s-teen-camp-2026/images/1181.jpg', label: '保护组织细胞', description: '紧密排列，像“盾牌”一样。' },
+            { id: 'test3', src: '/ai4s-teen-camp-2026/images/1182.jpg', label: '分生组织细胞', description: '细胞更小，分裂活跃。' },
+            { id: 'test4', src: '/ai4s-teen-camp-2026/images/1184.jpg', label: '保护组织细胞', description: '致密排列，纹理清晰。' },
+            { id: 'test5', src: '/ai4s-teen-camp-2026/images/1185.jpg', label: '叶片表皮细胞', description: '表面平整，边缘平滑。' }
+        ];
+
+        function initializeDraggableImages() {
+            const grid = document.getElementById('draggableImagesGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            testImages.forEach((image, index) => {
+                const item = document.createElement('div');
+                item.className = 'draggable-image-item';
+                item.draggable = true;
+                item.dataset.imageId = image.id;
+
+                const imgEl = document.createElement('img');
+                imgEl.src = image.src;
+                imgEl.alt = `测试图片 ${index + 1}`;
+
+                const label = document.createElement('div');
+                label.className = 'image-label';
+                label.textContent = `图片 ${index + 1}`;
+
+                item.appendChild(imgEl);
+                item.appendChild(label);
+
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                grid.appendChild(item);
+            });
+        }
+
+        function handleDragStart(event) {
+            event.dataTransfer.effectAllowed = 'move';
+            const target = event.currentTarget;
+            event.dataTransfer.setData('text/plain', target.dataset.imageId);
+            target.classList.add('dragging');
+        }
+
+        function handleDragEnd(event) {
+            event.currentTarget.classList.remove('dragging');
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            const slot = event.currentTarget;
+            slot.classList.remove('drag-over');
+            const imageId = event.dataTransfer.getData('text/plain');
+            const imageData = testImages.find(img => img.id === imageId);
+            if (!imageData) return;
+
+            const inputImage = document.getElementById('inputImage');
+            const placeholder = document.querySelector('#inputSlot .slot-placeholder');
+            inputImage.src = imageData.src;
+            inputImage.style.display = 'block';
+            placeholder.style.display = 'none';
+
+            processImage(imageData);
+        }
+
+        function processImage(imageData) {
+            const processor = document.getElementById('aiProcessor');
+            const idle = processor.querySelector('.processor-idle');
+            const working = processor.querySelector('.processor-working');
+            idle.style.display = 'none';
+            working.style.display = 'flex';
+
+            setTimeout(() => {
+                working.style.display = 'none';
+                idle.style.display = 'flex';
+                showResult(imageData);
+            }, 1500);
+        }
+
+        function showResult(imageData) {
+            const placeholder = document.getElementById('resultPlaceholder');
+            const content = document.getElementById('resultContent');
+            const label = document.getElementById('resultLabel');
+            const description = document.getElementById('resultDescription');
+
+            label.textContent = imageData.label;
+            description.textContent = imageData.description;
+            placeholder.style.display = 'none';
+            content.style.display = 'block';
+        }
+
+        function resetDemo() {
+            const inputImage = document.getElementById('inputImage');
+            const placeholder = document.querySelector('#inputSlot .slot-placeholder');
+            const processor = document.getElementById('aiProcessor');
+            const idle = processor.querySelector('.processor-idle');
+            const working = processor.querySelector('.processor-working');
+            const resultPlaceholder = document.getElementById('resultPlaceholder');
+            const resultContent = document.getElementById('resultContent');
+
+            inputImage.style.display = 'none';
+            placeholder.style.display = 'block';
+            idle.style.display = 'flex';
+            working.style.display = 'none';
+            resultPlaceholder.style.display = 'block';
+            resultContent.style.display = 'none';
+        }
+
+        // 模型评估交互
+        const modelConfigs = {
+            A: { title: '模型 A · 轻量级 CNN', accuracy: 0.78, insight: '结构浅，速度快，但对复杂纹理把握不足，适合作为基线模型。' },
+            B: { title: '模型 B · 增强版 CNN', accuracy: 0.87, insight: '引入注意力模块与数据增强，在准确率与效率间取得平衡。' },
+            C: { title: '模型 C · Vision Transformer', accuracy: 0.93, insight: '参数最多，计算量也最大，但能捕捉全局纹理，表现最好。' }
+        };
+
+        const modelStates = Object.keys(modelConfigs).reduce((acc, key) => {
+            acc[key] = { hasData: false, trained: false, submitted: false };
+            return acc;
+        }, {});
+
+        let selectedEvaluationModel = null;
+        let mingStepIndex = -1;
+
+        const mingIterations = [
+            {
+                round: 1,
+                train: '先进行简单调整，提交了一个基础版的卷积神经网络模型。',
+                leaderboardText: '第 3 名 · 92.6 分',
+                board: [
+                    { name: '模型 C', score: '95.2' },
+                    { name: '模型 B', score: '93.7' },
+                    { name: '小明模型', score: '92.6', focus: true },
+                ],
+                log: '排名蹭地跳到了第三名，他非常开心。',
+                hint: '这次调参确实让榜单分数更高。'
+            },
+            {
+                round: 2,
+                train: '针对排行榜上的特定图像单独加“补丁”，把这些样本的分数抬上去。',
+                leaderboardText: '第 2 名 · 96.2 分',
+                board: [
+                    { name: '模型 C', score: '96.8' },
+                    { name: '小明模型', score: '96.2', focus: true },
+                    { name: '模型 B', score: '93.0' }
+                ],
+                log: '榜单又往前挪了一格，他开始觉得“只要继续针对榜单数据打补丁就行”。',
+                hint: '排名只剩最后一步，小明决定再冲一次。'
+            },
+            {
+                round: 3,
+                train: '继续针对测试集得分调参。',
+                leaderboardText: '第 1 名 · 98.1 分',
+                board: [
+                    { name: '小明模型', score: '98.1', focus: true },
+                    { name: '模型 C', score: '96.5' },
+                    { name: '模型 B', score: '93.1' }
+                ],
+                log: '排行榜终于变成第一名，小明的算法获得了正式上线的资格！',
+                hint: '看上去大获全胜，但他真的学会了吗？'
+            }
+        ];
+
+        const mingFinalResult = {
+            publicScore: '98 分',
+            freshScore: '72 分',
+            text: '上线当天，真实新图像的得分只有 72 分。'
+        };
+
+        function updateModelStatus(modelId, status, text) {
+            const el = document.getElementById(`status-${modelId}`);
+            if (!el) return;
+            el.className = 'model-status';
+            if (status) el.classList.add(status);
+            el.textContent = text;
+        }
+
+        function highlightTrainZone(modelId) {
+            const zone = document.querySelector(`.model-train-zone[data-model="${modelId}"]`);
+            if (!zone) return;
+            zone.classList.add('shake');
+            setTimeout(() => zone.classList.remove('shake'), 500);
+        }
+
+        function handleTrainingDragStart(event) {
+            event.dataTransfer.setData('text/plain', 'training-set');
+            event.currentTarget.classList.add('dragging');
+        }
+
+        function handleTrainingDragEnd(event) {
+            event.currentTarget.classList.remove('dragging');
+        }
+
+        function handleModelDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleModelDragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleModelDrop(event) {
+            event.preventDefault();
+            const modelId = event.currentTarget.dataset.model;
+            const zone = event.currentTarget;
+            zone.classList.remove('drag-over');
+            zone.classList.add('loaded');
+            const hint = zone.querySelector('.train-hint');
+            if (hint) hint.textContent = '训练集已就绪';
+            modelStates[modelId].hasData = true;
+            modelStates[modelId].trained = false;
+            modelStates[modelId].submitted = false;
+            updateModelStatus(modelId, 'ready', '训练集已加载 ✅');
+            updateEvaluationButtons();
+        }
+
+        function handleTrainModel(event) {
+            const modelId = event.currentTarget.dataset.model;
+            if (!modelStates[modelId].hasData) {
+                updateModelStatus(modelId, 'warning', '先把训练集拖过来！');
+                highlightTrainZone(modelId);
+                return;
+            }
+
+            updateModelStatus(modelId, 'training', '训练中...');
+            setTimeout(() => {
+                modelStates[modelId].trained = true;
+                modelStates[modelId].submitted = false;
+                updateModelStatus(modelId, 'success', '训练完成 ✅ 可提交');
+                updateEvaluationButtons();
+            }, 1100);
+        }
+
+        function handleSubmitModel(event) {
+            const modelId = event.currentTarget.dataset.model;
+            if (!modelStates[modelId].trained) {
+                updateModelStatus(modelId, 'warning', '请先完成训练再提交');
+                highlightTrainZone(modelId);
+                return;
+            }
+            modelStates[modelId].submitted = true;
+            updateModelStatus(modelId, 'success', '已提交评测 ✅');
+            updateEvaluationButtons();
+        }
+
+        function updateEvaluationButtons() {
+            const buttons = document.querySelectorAll('.evaluation-model-btn');
+            buttons.forEach(btn => {
+                const modelId = btn.dataset.model;
+                const state = modelStates[modelId];
+                btn.classList.remove('active', 'disabled');
+                if (!state.submitted) {
+                    btn.classList.add('disabled');
+                    btn.textContent = `模型 ${modelId}（待提交）`;
+                } else {
+                    btn.textContent = selectedEvaluationModel === modelId ? `模型 ${modelId}（已选）` : `模型 ${modelId}（可评测）`;
+                }
+                if (selectedEvaluationModel === modelId) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function initMingFlow() {
+            mingStepIndex = -1;
+            const trainTitle = document.getElementById('mingTrainTitle');
+            const trainText = document.getElementById('mingTrainText');
+            const submitTitle = document.getElementById('mingSubmitTitle');
+            const submitText = document.getElementById('mingSubmitText');
+            const rankText = document.getElementById('mingRankText');
+            const leaderboardList = document.getElementById('mingLeaderboardList');
+            const log = document.getElementById('mingLog');
+            const hint = document.getElementById('mingHintText');
+            const btn = document.getElementById('mingNextBtn');
+            const newDataPanel = document.getElementById('mingNewData');
+
+            if (trainTitle) trainTitle.textContent = '等待开始 · 训练';
+            if (trainText) trainText.textContent = '点击下方按钮，观察小明如何一步步打榜。';
+            if (submitTitle) submitTitle.textContent = '提交记录';
+            if (submitText) submitText.textContent = '尚未提交';
+            if (rankText) rankText.textContent = '还没有排名';
+            if (leaderboardList) {
+                leaderboardList.innerHTML = `
+                    <li><span>模型 C</span><span>95.0</span></li>
+                    <li><span>模型 B</span><span>93.2</span></li>
+                    <li><span>模型 A</span><span>92.5</span></li>
+                `;
+            }
+            if (log) {
+                log.innerHTML = `
+                    <div class="ming-log-entry">
+                        <strong>提示</strong>点击“开始小明的打榜”，看看他为了冲分都做了什么。
+                    </div>
+                `;
+            }
+            if (hint) hint.textContent = '小明准备进行第 1 次训练与提交。';
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '开始小明的打榜';
+            }
+            if (newDataPanel) newDataPanel.style.display = 'none';
+        }
+
+        function applyMingIteration(iter) {
+            const trainTitle = document.getElementById('mingTrainTitle');
+            const trainText = document.getElementById('mingTrainText');
+            const submitTitle = document.getElementById('mingSubmitTitle');
+            const submitText = document.getElementById('mingSubmitText');
+            const rankText = document.getElementById('mingRankText');
+            const leaderboardList = document.getElementById('mingLeaderboardList');
+            const log = document.getElementById('mingLog');
+            const hint = document.getElementById('mingHintText');
+
+            if (trainTitle) trainTitle.textContent = `第 ${iter.round} 轮 · 训练`;
+            if (trainText) trainText.textContent = iter.train;
+            if (submitTitle) submitTitle.textContent = `第 ${iter.round} 轮 · 提交`;
+            if (submitText) submitText.textContent = iter.submit;
+            if (rankText) rankText.textContent = iter.leaderboardText;
+            if (leaderboardList) {
+                leaderboardList.innerHTML = '';
+                iter.board.forEach(item => {
+                    const li = document.createElement('li');
+                    if (item.focus) li.classList.add('highlight');
+                    li.innerHTML = `<span>${item.name}</span><span>${item.score}</span>`;
+                    leaderboardList.appendChild(li);
+                });
+            }
+            if (log) {
+                const entry = document.createElement('div');
+                entry.className = 'ming-log-entry';
+                entry.innerHTML = `<strong>第 ${iter.round} 轮</strong>${iter.log}`;
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+            }
+            if (hint) hint.textContent = iter.hint;
+        }
+
+        function revealMingNewData() {
+            const panel = document.getElementById('mingNewData');
+            const publicEl = document.getElementById('mingPublicFinal');
+            const freshEl = document.getElementById('mingFreshFinal');
+            const finalText = document.getElementById('mingFinalText');
+            const hint = document.getElementById('mingHintText');
+            const btn = document.getElementById('mingNextBtn');
+            if (panel) panel.style.display = 'block';
+            if (publicEl) publicEl.textContent = mingFinalResult.publicScore;
+            if (freshEl) freshEl.textContent = mingFinalResult.freshScore;
+            if (finalText) finalText.textContent = mingFinalResult.text;
+            if (hint) hint.textContent = '真实数据揭示：只盯着榜单分数，并不代表模型真的学会。';
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '体验结束';
+            }
+        }
+
+        function handleMingNext() {
+            const btn = document.getElementById('mingNextBtn');
+            if (!btn) return;
+            if (mingStepIndex < mingIterations.length - 1) {
+                mingStepIndex += 1;
+                applyMingIteration(mingIterations[mingStepIndex]);
+                btn.textContent = mingStepIndex === mingIterations.length - 1 ? '上线后会怎样？' : '再调一次';
+                return;
+            }
+            revealMingNewData();
+        }
+
+        function handleEvaluationModelClick(event) {
+            const modelId = event.currentTarget.dataset.model;
+            if (!modelStates[modelId].submitted) {
+                return;
+            }
+            selectedEvaluationModel = modelId;
+            updateEvaluationButtons();
+        }
+
+        function handleTestDragStart(event) {
+            event.dataTransfer.setData('text/plain', 'test-set');
+            event.currentTarget.classList.add('dragging');
+        }
+
+        function handleTestDragEnd(event) {
+            event.currentTarget.classList.remove('dragging');
+        }
+
+        function handleTestZoneDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleTestZoneDragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function showEvaluationResult(title, accuracyText, detail) {
+            document.getElementById('evaluationResultTitle').textContent = title;
+            document.getElementById('evaluationResultAccuracy').textContent = accuracyText;
+            document.getElementById('evaluationResultText').textContent = detail;
+        }
+
+        function handleTestZoneDrop(event) {
+            event.preventDefault();
+            const zone = event.currentTarget;
+            zone.classList.remove('drag-over');
+
+            if (!selectedEvaluationModel) {
+                showEvaluationResult('尚未选择模型', '--%', '请先在上方选择已提交的模型，再拖入测试集。');
+                return;
+            }
+
+            const state = modelStates[selectedEvaluationModel];
+            if (!state.submitted) {
+                showEvaluationResult('模型尚未提交', '--%', '只有提交到评测区的模型才能在测试集上评分。');
+                return;
+            }
+
+            const config = modelConfigs[selectedEvaluationModel];
+            const accuracyText = `${(config.accuracy * 100).toFixed(1)}%`;
+            showEvaluationResult(
+                `${config.title} 的测试集成绩`,
+                accuracyText,
+                config.insight
+            );
+        }
+
+        function setupModelWorkflow() {
+            const trainingCard = document.getElementById('trainingDataset');
+            const trainZones = document.querySelectorAll('.model-train-zone');
+            const trainButtons = document.querySelectorAll('.train-model-btn');
+            const submitButtons = document.querySelectorAll('.submit-model-btn');
+            const evaluationButtons = document.querySelectorAll('.evaluation-model-btn');
+            const testCard = document.getElementById('testDataset');
+            const testDropZone = document.getElementById('testDropZone');
+
+            if (trainingCard) {
+                trainingCard.addEventListener('dragstart', handleTrainingDragStart);
+                trainingCard.addEventListener('dragend', handleTrainingDragEnd);
+            }
+
+            trainZones.forEach(zone => {
+                zone.addEventListener('dragover', handleModelDragOver);
+                zone.addEventListener('dragleave', handleModelDragLeave);
+                zone.addEventListener('drop', handleModelDrop);
+            });
+            trainButtons.forEach(btn => btn.addEventListener('click', handleTrainModel));
+            submitButtons.forEach(btn => btn.addEventListener('click', handleSubmitModel));
+            evaluationButtons.forEach(btn => btn.addEventListener('click', handleEvaluationModelClick));
+
+            if (testCard) {
+                testCard.addEventListener('dragstart', handleTestDragStart);
+                testCard.addEventListener('dragend', handleTestDragEnd);
+            }
+            if (testDropZone) {
+                testDropZone.addEventListener('dragover', handleTestZoneDragOver);
+                testDropZone.addEventListener('dragleave', handleTestZoneDragLeave);
+                testDropZone.addEventListener('drop', handleTestZoneDrop);
+            }
+
+            updateEvaluationButtons();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeCellImages();
+            initializeDraggableImages();
+            document.getElementById('resetDemoBtn').addEventListener('click', resetDemo);
+            setupModelWorkflow();
+            initMingFlow();
+            const mingBtn = document.getElementById('mingNextBtn');
+            if (mingBtn) {
+                mingBtn.addEventListener('click', handleMingNext);
+            }
+        });
+    </script>
+</body>
+</html>
