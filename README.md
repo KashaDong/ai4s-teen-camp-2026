@@ -48,7 +48,7 @@ AI4S 青少年人工智能驱动科学挑战营 · 官方开源课程资源库
 
 **算法比赛入门**
 
-[算法比赛入门](https://kashadong.github.io/ai4s-teen-camp-2026/task5-sequences/what-is-competition-v2.html)
+[算法比赛入门](https://kashadong.github.io/ai4s-teen-camp-2026/competition-guide/what-is-competition-v2.html)
 
 **任务一：天气瓶中的数据科学**
 
