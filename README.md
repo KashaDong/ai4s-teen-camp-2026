@@ -110,7 +110,7 @@ AI4S 青少年人工智能驱动科学挑战营 · 官方开源课程资源库
   
 ## 📄 License  
   
-- Code: [MIT License](LICENSE)  
+- Code:[ AGPL-3.0 License](LICENSE)  
 - Course Content: [CC BY-NC-SA 4.0](CONTENT_LICENSE)  
 - Data: [CC BY-NC-SA 4.0](DATA_LICENSE)  
   
