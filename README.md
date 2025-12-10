@@ -85,7 +85,7 @@ AI4S 青少年人工智能驱动科学挑战营 · 官方开源课程资源库
 
 本次挑战营以任务为中心展开，其中有四个任务源自 [AI4S TEEN CUP 教学赛（2025-2026）](https://www.bohrium.com/competitions/91778252314?tab=introduce)，可通过下面的链接访问赛题并参赛：
 
-1. [天气瓶物质X溶解度矩阵补全与晶体配方识别（对应任务一）](天气瓶物质X溶解度矩阵补全与晶体配方识别)
+1. [天气瓶物质X溶解度矩阵补全与晶体配方识别（对应任务一）](https://www.bohrium.com/competitions/25112976824?tab=introduce)
 2. [揭示神秘宇宙区域的物理法则（对应任务二）](https://www.bohrium.com/competitions/62996247598?tab=introduce)
 3. [递推数列的参数求解（对应任务五）](https://www.bohrium.com/competitions/47554812168?tab=introduce)
 4. [区分三类植物细胞（对应任务七）](https://www.bohrium.com/competitions/18661533825?tab=introduce)
