@@ -47,22 +47,33 @@
         .neural-diagram {
             text-align: center;
             margin: 20px 0;
+            position: relative;
         }
         .layer {
             display: inline-block;
             vertical-align: middle;
-            margin: 0 20px;
+            margin: 0 15px;
+        }
+        .layer-title {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
         .neuron {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin: 10px auto;
+            margin: 15px auto;
             font-weight: bold;
             color: white;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .input-neuron {
             background: #3498db;
@@ -72,6 +83,12 @@
         }
         .output-neuron {
             background: #e74c3c;
+        }
+        .activation {
+            font-size: 10px;
+            margin-top: 2px;
+            color: #f1c40f;
+            font-weight: bold;
         }
         .function-example {
             background: #e8f4f8;
@@ -100,6 +117,67 @@
             color: #27ae60;
             font-weight: bold;
         }
+        
+        /* 连接线样式 */
+        .connections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .connection {
+            stroke-width: 1.5;
+            fill: none;
+        }
+        .linear-connection {
+            stroke: #e74c3c;
+            stroke-dasharray: 5,3;
+        }
+        .neural-connection {
+            stroke: #7f8c8d;
+            opacity: 0.6;
+        }
+        
+        .weight-label {
+            position: absolute;
+            font-size: 10px;
+            color: #34495e;
+            background: rgba(255,255,255,0.8);
+            padding: 1px 3px;
+            border-radius: 2px;
+            z-index: 3;
+        }
+        
+        .bias-label {
+            position: absolute;
+            font-size: 10px;
+            color: #c0392b;
+            background: rgba(255,255,255,0.8);
+            padding: 1px 3px;
+            border-radius: 2px;
+            font-style: italic;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -122,38 +200,152 @@
         <div class="comparison">
             <div class="model linear-model">
                 <h3>线性回归模型</h3>
-                <div class="neural-diagram">
+                <div class="neural-diagram" id="linearDiagram">
                     <div class="layer">
+                        <div class="layer-title">输入层</div>
                         <div class="neuron input-neuron">$a_n$</div>
                         <div class="neuron input-neuron">$a_{n+1}$</div>
                     </div>
-                    <div style="display:inline-block; margin: 0 20px; font-size: 24px;">→</div>
+                    
+                    <div style="display:inline-block; vertical-align: middle; margin: 0 5px; font-size: 20px; color: #F8F9FA;">+</div>
+                    
                     <div class="layer">
-                        <div class="neuron output-neuron">$a_{n+3}$</div>
+                        <div class="layer-title">输出层</div>
+                        <div class="neuron output-neuron">
+                            $a_{n+3}$
+                            <div class="activation">∑</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 连接线 -->
+                    <svg class="connections" viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet">
+                        <!-- an 到输出的连接 -->
+                        <line class="connection linear-connection" x1="85" y1="70" x2="220" y2="115"></line>
+                        <!-- an+1 到输出的连接 -->
+                        <line class="connection linear-connection" x1="85" y1="150" x2="220" y2="115"></line>
+                    </svg>
+                    
+                    <!-- 权重标签 -->
+                    <div class="weight-label" style="top: 70px; left: 240px;">$w_1 = -q$</div>
+                    <div class="weight-label" style="top: 120px; left: 240px;">$w_2 = p$</div>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #3498db;"></div>
+                        <span>输入神经元</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #e74c3c;"></div>
+                        <span>输出神经元</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: repeating-linear-gradient(45deg, transparent, transparent 2px, #e74c3c 2px, #e74c3c 5px); width: 15px; height: 2px; border-radius: 0;"></div>
+                        <span>线性权重连接</span>
                     </div>
                 </div>
+                
                 <p><strong>数学形式：</strong> $a_{n+3} = p \cdot a_{n+1} - q \cdot a_n$</p>
                 <p><strong>局限性：</strong> 只能表示输入变量的线性组合，无法捕捉复杂的非线性关系。</p>
             </div>
             
             <div class="model neural-network">
                 <h3>神经网络模型</h3>
-                <div class="neural-diagram">
+                <div class="neural-diagram" id="neuralDiagram">
                     <div class="layer">
+                        <div class="layer-title">输入层</div>
                         <div class="neuron input-neuron">$a_n$</div>
                         <div class="neuron input-neuron">$a_{n+1}$</div>
                     </div>
-                    <div style="display:inline-block; margin: 0 20px; font-size: 24px;">→</div>
+                    
                     <div class="layer">
-                        <div class="neuron hidden-neuron">$h_1$</div>
-                        <div class="neuron hidden-neuron">$h_2$</div>
-                        <div class="neuron hidden-neuron">$h_3$</div>
+                        <div class="layer-title">隐藏层</div>
+                        <div class="neuron hidden-neuron">
+                            $h_1$
+                            <div class="activation">σ</div>
+                        </div>
+                        <div class="neuron hidden-neuron">
+                            $h_2$
+                            <div class="activation">σ</div>
+                        </div>
+                        <div class="neuron hidden-neuron">
+                            $h_3$
+                            <div class="activation">σ</div>
+                        </div>
+                        
+                        <!-- 偏置标签 -->
+                        <div class="bias-label" style="top: 100px; left: 180px;">$b_1$</div>
+                        <div class="bias-label" style="top: 165px; left: 180px;">$b_2$</div>
+                        <div class="bias-label" style="top: 230px; left: 180px;">$b_3$</div>
                     </div>
-                    <div style="display:inline-block; margin: 0 20px; font-size: 24px;">→</div>
+                    
                     <div class="layer">
-                        <div class="neuron output-neuron">$a_{n+3}$</div>
+                        <div class="layer-title">输出层</div>
+                        <div class="neuron output-neuron">
+                            $a_{n+3}$
+                            <div class="activation">∑</div>
+                        </div>
+                        
+                        <!-- 输出层偏置 -->
+                        <div class="bias-label" style="top: 165px; left: 390px;">$c$</div>
+                    </div>
+                    
+                    <!-- 连接线 -->
+                    <svg class="connections" viewBox="0 0 500 300" preserveAspectRatio="xMidYMid meet">
+                        <!-- 输入层到隐藏层的连接 -->
+                        <g class="input-to-hidden">
+                            <!-- 从an到h1, h2, h3 -->
+                            <line class="connection neural-connection" x1="130" y1="120" x2="250" y2="75"></line>
+                            <line class="connection neural-connection" x1="130" y1="120" x2="250" y2="165"></line>
+                            <line class="connection neural-connection" x1="130" y1="120" x2="250" y2="250"></line>
+                            
+                            <!-- 从an+1到h1, h2, h3 -->
+                            <line class="connection neural-connection" x1="130" y1="210" x2="250" y2="75"></line>
+                            <line class="connection neural-connection" x1="130" y1="210" x2="250" y2="165"></line>
+                            <line class="connection neural-connection" x1="130" y1="210" x2="250" y2="250"></line>
+                        </g>
+                        
+                        <!-- 隐藏层到输出层的连接 -->
+                        <g class="hidden-to-output">
+                            <!-- 从h1, h2, h3到输出 -->
+                            <line class="connection neural-connection" x1="250" y1="75" x2="360" y2="165"></line>
+                            <line class="connection neural-connection" x1="250" y1="165" x2="360" y2="165"></line>
+                            <line class="connection neural-connection" x1="250" y1="255" x2="360" y2="165"></line>
+                        </g>
+                    </svg>
+                    
+                    <!-- 权重标签示例 -->
+                    <div class="weight-label" style="top: 70px; left: 190px;">$w_{11}$</div>
+                    <div class="weight-label" style="top: 105px; left: 190px;">$w_{21}$</div>
+                    <div class="weight-label" style="top: 125px; left: 175px;">$w_{32}$</div>
+ 		    <div class="weight-label" style="top: 90px; left: 215px;">$w_{11}$</div>
+                    <div class="weight-label" style="top: 145px; left: 215px;">$w_{21}$</div>
+                    <div class="weight-label" style="top: 190px; left: 215px;">$w_{32}$</div>
+                    
+                    <div class="weight-label" style="top: 90px; left: 300px;">$v_1$</div>
+                    <div class="weight-label" style="top: 130px; left: 300px;">$v_2$</div>
+                    <div class="weight-label" style="top: 170px; left: 300px;">$v_3$</div>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #3498db;"></div>
+                        <span>输入神经元</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #9b59b6;"></div>
+                        <span>隐藏神经元 (带激活函数σ)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #e74c3c;"></div>
+                        <span>输出神经元</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #7f8c8d; opacity: 0.6;"></div>
+                        <span>权重连接</span>
                     </div>
                 </div>
+                
                 <p><strong>数学形式：</strong> </p>
                 <p>$h_1 = \sigma(w_{11}a_n + w_{12}a_{n+1} + b_1)$</p>
                 <p>$h_2 = \sigma(w_{21}a_n + w_{22}a_{n+1} + b_2)$</p>

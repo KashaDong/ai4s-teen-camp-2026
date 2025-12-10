@@ -1,0 +1,23 @@
+# macOS system metadata
+
+.DS_Store
+**/.DS_Store
+
+# Jupyter Notebook checkpoints
+
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Python bytecode cache
+
+**pycache**/
+**/**pycache**/
+*.py[cod]
+
+# Local secrets
+
+*.env
+.gh_token
+.git-credentials
+
+

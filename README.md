@@ -80,7 +80,16 @@ AI4S 青少年人工智能驱动科学挑战营 · 官方开源课程资源库
 
 [手写数字识别](https://kashadong.github.io/ai4s-teen-camp-2026/task6-biotoAI/digit-recognition/3D-Visualization-of-a-Convolutional-Neural-Network.html)
 
-  
+
+## AI4S TEEN CUP 比赛直通车
+
+本次挑战营以任务为中心展开，其中有四个任务源自 [AI4S TEEN CUP 教学赛（2025-2026）](https://www.bohrium.com/competitions/91778252314?tab=introduce)，可通过下面的链接访问赛题并参赛：
+
+1. [天气瓶物质X溶解度矩阵补全与晶体配方识别（对应任务一）](天气瓶物质X溶解度矩阵补全与晶体配方识别)
+2. [揭示神秘宇宙区域的物理法则（对应任务二）](https://www.bohrium.com/competitions/62996247598?tab=introduce)
+3. [递推数列的参数求解（对应任务五）](https://www.bohrium.com/competitions/47554812168?tab=introduce)
+4. [区分三类植物细胞（对应任务七）](https://www.bohrium.com/competitions/18661533825?tab=introduce)
+
 ## 🧠 支持平台 / Technical Support  
   
 - **Bohrium 在线科研计算环境接入**  
