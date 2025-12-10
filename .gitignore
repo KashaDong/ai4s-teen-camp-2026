@@ -14,10 +14,8 @@
 **/**pycache**/
 *.py[cod]
 
-# Local secrets
+# Local secrets (never commit)
 
 *.env
 .gh_token
 .git-credentials
-
-
